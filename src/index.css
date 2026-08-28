@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --spydyy-red: #b91c1c;
+    --spydyy-dark: #111827;
+    --spydyy-bg: #fcfcfc;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    background-color: #fcfcfc;
+    color: #111827;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: #fcfcfc;
+    color: #111827;
+  }
+
+  /* Minimalist clean scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #111827;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #b91c1c;
+    border-radius: 4px;
+  }
+}
+
+/* Comic 3D Text Shadow Effect */
+.text-3d-red {
+  text-shadow: 2.5px 2.5px 0px #b91c1c, 4.5px 4.5px 0px #111827;
+}
+
+.text-3d-dark {
+  text-shadow: 2.5px 2.5px 0px #111827, 4.5px 4.5px 0px #b91c1c;
+}
+
+/* Spydyy White Card Token */
+.spydyy-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spydyy-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -4px rgba(185, 28, 28, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(185, 28, 28, 0.3);
+}
+
+/* Continuous Infinite Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: 200%;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: 200%;
+  animation: marquee 28s linear infinite reverse;
+}
+
+/* Spider Web Hanging Sway Animation */
+@keyframes webSwayLeft {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0px) scale(1);
+  }
+  50% {
+    transform: rotate(2deg) translateY(8px) scale(1.02);
+  }
+}
+
+@keyframes webSwayRight {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0px) scale(1);
+  }
+  50% {
+    transform: rotate(-2deg) translateY(8px) scale(1.02);
+  }
+}
+
+.animate-web-sway-left {
+  animation: webSwayLeft 6s ease-in-out infinite;
+  transform-origin: top left;
+}
+
+.animate-web-sway-right {
+  animation: webSwayRight 6.5s ease-in-out infinite;
+  transform-origin: top right;
+}
+
+/* Hanging Spider-Man Pendulum Animation */
+@keyframes spiderHang {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(14px) rotate(-2deg);
+  }
+}
+
+.animate-spider-hang {
+  animation: spiderHang 4.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* Hanging Thread Line */
+.hanging-thread {
+  position: absolute;
+  top: 0;
+  width: 1.5px;
+  background: linear-gradient(to bottom, #111827 0%, #b91c1c 100%);
+  pointer-events: none;
+}
