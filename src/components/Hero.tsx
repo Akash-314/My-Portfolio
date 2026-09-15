@@ -2,8 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Download, Compass } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
+import { usePortfolio } from '../context/PortfolioContext';
 import { CornerWebTopLeft, CornerWebBottomRight } from './SpiderManSuspensions';
 import { SpiderMaskReveal } from './SpiderMaskReveal';
+import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -11,18 +13,23 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
   const { personal } = portfolioData;
+  const { resumeUrl, resumeSettings } = usePortfolio();
+  const effectiveResumePath = resumeUrl || personal.contact.resumePath;
+  const isExternalUrl =
+    effectiveResumePath.startsWith('http://') || effectiveResumePath.startsWith('https://');
 
   const handleResumeClick = () => {
-    const resumePath = personal.contact.resumePath;
-    fetch(resumePath, { method: 'HEAD' })
-      .then((res) => {
-        if (!res.ok) {
-          console.log('Resume ready at /resume.pdf');
-        }
-      })
-      .catch(() => {
-        console.log('Resume configured at /resume.pdf');
-      });
+    if (!isExternalUrl && !effectiveResumePath.startsWith('data:')) {
+      fetch(effectiveResumePath, { method: 'HEAD' })
+        .then((res) => {
+          if (!res.ok) {
+            console.log('Resume ready at ' + effectiveResumePath);
+          }
+        })
+        .catch(() => {
+          console.log('Resume configured at ' + effectiveResumePath);
+        });
+    }
   };
 
   return (
@@ -30,11 +37,10 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
       id="hero"
       className="relative w-screen h-screen min-h-screen flex items-center justify-center pt-16 bg-[#fcfcfc] overflow-hidden"
     >
-      {/* Full Page 100vw x 100vh Image Reveal Background */}
+      {/* Full Page 100vw x 100vh Spider-Man Suit Background */}
       <div className="absolute inset-0 w-full h-full z-0">
         <SpiderMaskReveal
           spidermanImage="/assets/spider/hero.png"
-          developerImage="/assets/spider/reveal_image.png"
           className="w-full h-full"
         />
       </div>
@@ -54,7 +60,8 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             className="text-xs sm:text-sm font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-3 flex items-center gap-2"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-[#b91c1c] animate-pulse" />
-            YOUR FRIENDLY NEIGHBORHOOD ENGINEER
+            <span>YOUR FRIENDLY NEIGHBORHOOD ENGINEER</span>
+            <AdminShieldTrigger className="opacity-25 hover:opacity-100 text-[#b91c1c] ml-0.5" iconSize={12} />
           </motion.div>
 
           {/* Heading with Comic 3D Text Shadow */}
@@ -85,8 +92,10 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
 
             {/* Solid Dark Secondary Capsule Button */}
             <a
-              href={personal.contact.resumePath}
-              download="Akash_Kumar_Resume.pdf"
+              href={effectiveResumePath}
+              target={isExternalUrl ? '_blank' : undefined}
+              rel={isExternalUrl ? 'noopener noreferrer' : undefined}
+              download={isExternalUrl ? undefined : (resumeSettings?.fileName || 'Akash_Kumar_Resume.pdf')}
               onClick={handleResumeClick}
               className="px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
             >
