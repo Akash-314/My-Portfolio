@@ -2,8 +2,13 @@ import React from 'react';
 import { ArrowUp, Mail } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { GithubIcon, LinkedinIcon } from './Icons';
+import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdmin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const { personal } = portfolioData;
 
   const scrollToTop = () => {
@@ -63,9 +68,10 @@ export const Footer: React.FC = () => {
 
         <div className="w-full max-w-xs h-px bg-gray-800 mb-4" />
 
-        <p className="text-xs text-gray-500 font-mono">
-          © 2026 Akash Kumar. Built with curiosity and code.
-        </p>
+        <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+          <span>© 2026 Akash Kumar. Built with curiosity and code.</span>
+          <AdminShieldTrigger onClick={onOpenAdmin} className="text-gray-600 hover:text-red-500 opacity-40 hover:opacity-100" iconSize={14} />
+        </div>
       </div>
     </footer>
   );

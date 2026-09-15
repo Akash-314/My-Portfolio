@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Terminal, ExternalLink, Code2, Flame, BarChart3, Award, Star } from 'lucide-react';
-import { portfolioData } from '../data/portfolio';
+import { usePortfolio } from '../context/PortfolioContext';
 import { GithubIcon } from './Icons';
+import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
+import { getLiveCodingStats, type LiveStatsResult } from '../services/codingStatsService';
 
 const CountUpNumber: React.FC<{ target: number; duration?: number }> = ({ target, duration = 1.2 }) => {
   const [count, setCount] = useState(0);
@@ -12,7 +14,7 @@ const CountUpNumber: React.FC<{ target: number; duration?: number }> = ({ target
   useEffect(() => {
     if (!isInView) return;
     let start = 0;
-    const step = target / (duration * 60);
+    const step = Math.max(1, target / (duration * 60));
     const interval = setInterval(() => {
       start += step;
       if (start >= target) {
@@ -29,12 +31,31 @@ const CountUpNumber: React.FC<{ target: number; duration?: number }> = ({ target
 };
 
 export const CodingStats: React.FC = () => {
-  const { codingStats } = portfolioData;
+  const { codingStats } = usePortfolio();
+  const [displayStats, setDisplayStats] = useState(codingStats);
+  const [liveInfo, setLiveInfo] = useState<Partial<LiveStatsResult>>({
+    isLive: false,
+    lastUpdated: codingStats.lastUpdated || 'Archive Verified'
+  });
 
-  const total = codingStats.easy + codingStats.medium + codingStats.hard;
-  const easyPct = ((codingStats.easy / total) * 100).toFixed(1);
-  const medPct = ((codingStats.medium / total) * 100).toFixed(1);
-  const hardPct = ((codingStats.hard / total) * 100).toFixed(1);
+  // Attempt non-blocking background fetch from official/public APIs
+  useEffect(() => {
+    let isMounted = true;
+    getLiveCodingStats(codingStats).then((res) => {
+      if (isMounted) {
+        setDisplayStats(res.stats);
+        setLiveInfo(res);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [codingStats]);
+
+  const total = (displayStats.easy || 0) + (displayStats.medium || 0) + (displayStats.hard || 0) || 1;
+  const easyPct = (((displayStats.easy || 0) / total) * 100).toFixed(1);
+  const medPct = (((displayStats.medium || 0) / total) * 100).toFixed(1);
+  const hardPct = (((displayStats.hard || 0) / total) * 100).toFixed(1);
 
   return (
     <section id="coding" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden">
@@ -57,88 +78,121 @@ export const CodingStats: React.FC = () => {
               <Terminal className="w-4 h-4" /> CODE_METRICS_HUD // C++ CORE
             </div>
             <div className="flex items-center gap-4">
+              {liveInfo.isLive ? (
+                <span className="text-emerald-600 font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  {liveInfo.lastUpdated}
+                </span>
+              ) : (
+                <span className="text-gray-500 font-semibold">{liveInfo.lastUpdated}</span>
+              )}
               <span className="text-blue-600 font-bold">STATUS: ACTIVE COMPETITOR</span>
               <span>PRIMARY: C++</span>
+              <AdminShieldTrigger className="opacity-25 hover:opacity-100 text-gray-400" iconSize={12} />
             </div>
           </div>
 
-          {/* 4 Core Stat Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {/* LeetCode Solved */}
-            <motion.div
+          {/* 4 Clickable Core Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {/* LeetCode Solved Card */}
+            <motion.a
+              href={displayStats.leetcodeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center"
+              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-[#b91c1c] hover:shadow-md transition-all cursor-pointer"
             >
-              <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider mb-1">
-                LEETCODE SOLVED
-              </span>
-              <div className="text-4xl font-extrabold text-[#b91c1c] font-mono">
-                <CountUpNumber target={codingStats.totalSolved} />+
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
+                  LEETCODE SOLVED
+                </span>
+                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-[#b91c1c] transition-colors" />
               </div>
-              <span className="text-[10px] font-mono text-gray-500 font-bold mt-1">
-                500+ PROBLEMS
+              <div className="text-4xl font-extrabold text-[#b91c1c] font-mono my-1">
+                <CountUpNumber target={displayStats.totalSolved} />
+              </div>
+              <span className="text-[10px] font-mono text-gray-500 font-bold flex items-center gap-1 group-hover:text-[#b91c1c] transition-colors">
+                {displayStats.totalSolved} PROBLEMS SOLVED • VIEW PROFILE →
               </span>
-            </motion.div>
+            </motion.a>
 
-            {/* Max LeetCode Rating */}
-            <motion.div
+            {/* Max LeetCode Rating Card */}
+            <motion.a
+              href={displayStats.leetcodeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center"
+              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-amber-500 hover:shadow-md transition-all cursor-pointer"
             >
-              <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider mb-1">
-                MAX LEETCODE RATING
-              </span>
-              <div className="text-4xl font-extrabold text-amber-500 font-mono flex items-center justify-center gap-1">
-                <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
-                <CountUpNumber target={codingStats.rating} />
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
+                  MAX LEETCODE
+                </span>
+                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-amber-600 transition-colors" />
               </div>
-              <span className="text-[10px] font-mono text-amber-600 font-bold mt-1">
-                1731 MAX RATING
+              <div className="text-4xl font-extrabold text-amber-500 font-mono flex items-center justify-center gap-1 my-1">
+                <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
+                <CountUpNumber target={displayStats.rating} />
+              </div>
+              <span className="text-[10px] font-mono text-amber-600 font-bold group-hover:underline transition-colors">
+                TOP 7% GLOBAL CONTEST →
               </span>
-            </motion.div>
+            </motion.a>
 
-            {/* Codeforces Max Rating */}
-            <motion.div
+            {/* Codeforces Max Rating Card */}
+            <motion.a
+              href={displayStats.codeforcesUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center"
+              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-blue-600 hover:shadow-md transition-all cursor-pointer"
             >
-              <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider mb-1">
-                MAX CODEFORCES
-              </span>
-              <div className="text-4xl font-extrabold text-blue-600 font-mono">
-                <CountUpNumber target={codingStats.codeforcesRating} />
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
+                  MAX CODEFORCES
+                </span>
+                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-blue-600 transition-colors" />
               </div>
-              <span className="text-[10px] font-mono text-blue-600 font-bold mt-1">
-                1109 MAX RATING
+              <div className="text-4xl font-extrabold text-blue-600 font-mono my-1">
+                <CountUpNumber target={displayStats.codeforcesRating} />
+              </div>
+              <span className="text-[10px] font-mono text-blue-600 font-bold group-hover:underline transition-colors">
+                {displayStats.codeforcesStatus || '1109 MAX RATING'} →
               </span>
-            </motion.div>
+            </motion.a>
 
-            {/* CodeChef Rating & 2* Coder */}
-            <motion.div
+            {/* CodeChef Rating Card */}
+            <motion.a
+              href={displayStats.codechefUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center"
+              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-emerald-600 hover:shadow-md transition-all cursor-pointer"
             >
-              <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider mb-1">
-                CODECHEF RATING
-              </span>
-              <div className="text-4xl font-extrabold text-emerald-600 font-mono">
-                <CountUpNumber target={codingStats.codechefRating} />
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
+                  CODECHEF RATING
+                </span>
+                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-emerald-600 transition-colors" />
               </div>
-              <span className="text-[10px] font-mono text-emerald-600 font-bold mt-1 uppercase flex items-center gap-1">
-                <Award className="w-3 h-3 text-emerald-600" /> {codingStats.codechefStars}
+              <div className="text-4xl font-extrabold text-emerald-600 font-mono my-1">
+                <CountUpNumber target={displayStats.codechefRating} />
+              </div>
+              <span className="text-[10px] font-mono text-emerald-600 font-bold uppercase flex items-center gap-1 group-hover:underline transition-colors">
+                <Award className="w-3 h-3 text-emerald-600" /> {displayStats.codechefStars} →
               </span>
-            </motion.div>
+            </motion.a>
           </div>
 
           {/* Difficulty Breakdown Visual Chart */}
@@ -156,17 +210,17 @@ export const CodingStats: React.FC = () => {
               <div
                 style={{ width: `${easyPct}%` }}
                 className="h-full bg-emerald-500"
-                title={`Easy: ${codingStats.easy}`}
+                title={`Easy: ${displayStats.easy}`}
               />
               <div
                 style={{ width: `${medPct}%` }}
                 className="h-full bg-amber-500"
-                title={`Medium: ${codingStats.medium}`}
+                title={`Medium: ${displayStats.medium}`}
               />
               <div
                 style={{ width: `${hardPct}%` }}
                 className="h-full bg-red-600"
-                title={`Hard: ${codingStats.hard}`}
+                title={`Hard: ${displayStats.hard}`}
               />
             </div>
 
@@ -175,7 +229,7 @@ export const CodingStats: React.FC = () => {
                 <div>
                   <span className="text-xs font-mono text-emerald-700 font-bold uppercase block">EASY</span>
                   <span className="text-xl font-bold font-mono text-emerald-900">
-                    <CountUpNumber target={codingStats.easy} />
+                    <CountUpNumber target={displayStats.easy} />
                   </span>
                 </div>
                 <span className="text-xs font-mono font-bold text-emerald-700">{easyPct}%</span>
@@ -185,7 +239,7 @@ export const CodingStats: React.FC = () => {
                 <div>
                   <span className="text-xs font-mono text-amber-700 font-bold uppercase block">MEDIUM</span>
                   <span className="text-xl font-bold font-mono text-amber-900">
-                    <CountUpNumber target={codingStats.medium} />
+                    <CountUpNumber target={displayStats.medium} />
                   </span>
                 </div>
                 <span className="text-xs font-mono font-bold text-amber-700">{medPct}%</span>
@@ -195,7 +249,7 @@ export const CodingStats: React.FC = () => {
                 <div>
                   <span className="text-xs font-mono text-red-700 font-bold uppercase block">HARD</span>
                   <span className="text-xl font-bold font-mono text-red-900">
-                    <CountUpNumber target={codingStats.hard} />
+                    <CountUpNumber target={displayStats.hard} />
                   </span>
                 </div>
                 <span className="text-xs font-mono font-bold text-red-700">{hardPct}%</span>
@@ -203,42 +257,55 @@ export const CodingStats: React.FC = () => {
             </div>
           </div>
 
-          {/* Profile Links */}
+          {/* Profile Links & Codolio Central Hub */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            {/* Codolio Central Profile Button */}
+            {displayStats.codolioUrl && (
+              <a
+                href={displayStats.codolioUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-gradient-to-r from-red-600 via-rose-700 to-red-800 hover:brightness-110 flex items-center gap-2 transition-all shadow-md transform hover:scale-[1.02]"
+              >
+                <span>VIEW COMPLETE CODING PROFILE (CODOLIO)</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+
             <a
-              href={codingStats.githubUrl}
+              href={displayStats.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] flex items-center gap-2 transition-colors shadow-md"
+              className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-black flex items-center gap-2 transition-colors shadow-sm"
             >
               <GithubIcon className="w-4 h-4" /> GITHUB REPO
             </a>
 
             <a
-              href={codingStats.leetcodeUrl}
+              href={displayStats.leetcodeUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-[#b91c1c] flex items-center gap-2 transition-colors shadow-sm"
             >
-              <Code2 className="w-4 h-4 text-amber-600" /> LEETCODE (1731 MAX) <ExternalLink className="w-3 h-3" />
+              <Code2 className="w-4 h-4 text-amber-600" /> LEETCODE <ExternalLink className="w-3 h-3" />
             </a>
 
             <a
-              href={codingStats.codeforcesUrl}
+              href={displayStats.codeforcesUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-blue-600 flex items-center gap-2 transition-colors shadow-sm"
             >
-              <Terminal className="w-4 h-4 text-blue-600" /> CODEFORCES (1109 MAX) <ExternalLink className="w-3 h-3" />
+              <Terminal className="w-4 h-4 text-blue-600" /> CODEFORCES <ExternalLink className="w-3 h-3" />
             </a>
 
             <a
-              href={codingStats.codechefUrl}
+              href={displayStats.codechefUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-emerald-600 flex items-center gap-2 transition-colors shadow-sm"
             >
-              <Award className="w-4 h-4 text-emerald-600" /> CODECHEF (1424 / 2★) <ExternalLink className="w-3 h-3" />
+              <Award className="w-4 h-4 text-emerald-600" /> CODECHEF <ExternalLink className="w-3 h-3" />
             </a>
           </div>
         </div>
