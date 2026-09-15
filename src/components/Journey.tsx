@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { GraduationCap, Trophy, Calendar, CheckCircle2, MapPin } from 'lucide-react';
-import { portfolioData } from '../data/portfolio';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const Journey: React.FC = () => {
-  const { journey } = portfolioData;
+  const { journey } = usePortfolio();
 
   return (
     <section id="journey" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden">
