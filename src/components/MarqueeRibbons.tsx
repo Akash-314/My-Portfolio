@@ -1,13 +1,17 @@
 import React from 'react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const MarqueeRibbons: React.FC = () => {
+  const { codingStats } = usePortfolio();
+  const solvedCount = codingStats.totalSolved || 541;
+
   const items = [
     'UI/UX DESIGN',
     'GSAP ANIMATIONS',
     'REACT NATIVE',
     'FULL STACK ENGINEER',
     'C++ & DSA SPECIALIST',
-    'LEETCODE 500+ SOLVED',
+    `LEETCODE ${solvedCount} SOLVED`,
     'ARJUNA 2.0 WINNER'
   ];
 

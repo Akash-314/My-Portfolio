@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Mail, Phone, Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
+import { usePortfolio } from '../context/PortfolioContext';
 import { GithubIcon, LinkedinIcon } from './Icons';
 import { HangingSpiderMan, CornerWebBottomRight } from './SpiderManSuspensions';
 
 export const Contact: React.FC = () => {
   const { contact } = portfolioData.personal;
+  const { addMessage } = usePortfolio();
 
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -40,10 +42,17 @@ export const Contact: React.FC = () => {
 
     setStatus('submitting');
 
+    // Save message to admin inbox in context/localStorage
+    addMessage({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      message: formData.message.trim()
+    });
+
     setTimeout(() => {
       setStatus('success');
       setFormData({ name: '', email: '', message: '' });
-    }, 800);
+    }, 600);
   };
 
   const contactCards = [
@@ -64,14 +73,12 @@ export const Contact: React.FC = () => {
       value: contact.email,
       link: `mailto:${contact.email}`,
       icon: Mail,
-      note: 'Editable placeholder'
     },
     {
       title: 'LinkedIn',
-      value: 'LinkedIn Profile',
+      value: 'sp4rk314',
       link: contact.linkedin,
       icon: LinkedinIcon,
-      note: 'Editable placeholder'
     }
   ];
 
@@ -119,7 +126,7 @@ export const Contact: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-[9px] font-mono font-bold text-gray-500 uppercase block">
-                          {c.title} {c.note && `(${c.note})`}
+                          {c.title}
                         </span>
                         <span className="text-xs font-bold text-[#111827] font-mono group-hover:text-[#b91c1c] transition-colors">
                           {c.value}

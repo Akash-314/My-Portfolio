@@ -34,6 +34,11 @@ export interface CodingStats {
   leetcodeUrl: string;
   codeforcesUrl: string;
   codechefUrl: string;
+  codolioUrl?: string;
+  leetcodeUsername?: string;
+  codeforcesUsername?: string;
+  codechefUsername?: string;
+  lastUpdated?: string;
 }
 
 export interface Achievement {
@@ -46,6 +51,26 @@ export interface Achievement {
   description: string;
   featured: boolean;
   tags: string[];
+  order?: number;
+  connectedTo?: string[]; // IDs of chained achievements for webbed constellation
+}
+
+export interface SkillItem {
+  id: string;
+  name: string;
+  category: string;
+  level: string;
+  highlight?: boolean;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  timestamp: number;
+  dateFormatted: string;
+  read: boolean;
 }
 
 export interface SkillCategory {
@@ -111,26 +136,31 @@ export const portfolioData: {
     contact: {
       github: "https://github.com/Akash-314",
       phone: "+91 7309402534",
-      email: "akash.kumar.dev@example.com", // EDITABLE PLACEHOLDER
-      linkedin: "https://linkedin.com/in/akash-kumar-placeholder", // EDITABLE PLACEHOLDER
+      email: "itsakash314@gmail.com",
+      linkedin: "https://www.linkedin.com/in/sp4rk314/",
       resumePath: "/resume.pdf"
     }
   },
 
   codingStats: {
-    totalSolved: 500,
-    easy: 153,
-    medium: 283,
-    hard: 65,
-    rating: 1731, // 1731 max leetcode rating
-    codeforcesRating: 1109, // 1109 max cf rating
-    codechefRating: 1424, // 1424 codechef rating
+    totalSolved: 541,
+    easy: 158,
+    medium: 309,
+    hard: 74,
+    rating: 1736, // 1736 max leetcode rating
+    codeforcesRating: 1269, // 1269 max cf rating (pupil)
+    codechefRating: 1477, // 1477 codechef rating
     codechefStars: "2★ Coder", // 2* coder
-    codeforcesStatus: "1109 Max Rating",
+    codeforcesStatus: "1269 Max Rating (Pupil)",
     githubUrl: "https://github.com/Akash-314",
-    leetcodeUrl: "https://leetcode.com/u/Akash-314", // EDITABLE PLACEHOLDER
-    codeforcesUrl: "https://codeforces.com/profile/Akash-314", // EDITABLE PLACEHOLDER
-    codechefUrl: "https://www.codechef.com/users/akashkumar314" // EDITABLE PLACEHOLDER
+    leetcodeUrl: "https://leetcode.com/u/Sp4rk314/",
+    codeforcesUrl: "https://codeforces.com/profile/itsakash314",
+    codechefUrl: "https://www.codechef.com/users/sp4rk314",
+    codolioUrl: "https://codolio.com/profile/Sp4rk",
+    leetcodeUsername: "Sp4rk314",
+    codeforcesUsername: "itsakash314",
+    codechefUsername: "sp4rk314",
+    lastUpdated: "Archive Verified"
   },
 
   achievements: [
@@ -143,7 +173,35 @@ export const portfolioData: {
       position: "1st Place",
       description: "Secured 1st place with my team by developing a Smart Drainage and Flood Prevention System, a technology-driven solution focused on flood monitoring and prevention.",
       featured: true,
-      tags: ["Hackathon Winner", "IoT / Flood Monitoring", "Smart Systems", "Team Lead"]
+      tags: ["Hackathon Winner", "IoT / Flood Monitoring", "Smart Systems", "Team Lead"],
+      order: 1,
+      connectedTo: ["leetcode-knight", "codechef-stars"]
+    },
+    {
+      id: "leetcode-knight",
+      title: "LEETCODE 1736 RATING & 541 PROBLEMS",
+      event: "Global Contest Leaderboard",
+      organizer: "LeetCode",
+      year: "2024 - 2025",
+      position: "Top 7% Worldwide",
+      description: "Achieved max contest rating of 1736 with 541 algorithmic problems solved across Easy, Medium, and Hard tiers in C++.",
+      featured: false,
+      tags: ["Competitive Programming", "C++", "Data Structures", "Algorithms"],
+      order: 2,
+      connectedTo: ["arjuna-2", "codechef-stars"]
+    },
+    {
+      id: "codechef-stars",
+      title: "2★ CODER ON CODECHEF (1477) & CF 1269",
+      event: "Rated Competitive Programming Rounds",
+      organizer: "CodeChef & Codeforces",
+      year: "2024",
+      position: "2★ Division Coder",
+      description: "Demonstrated strong speed and mathematical problem solving across Starters rounds and Div 3/4 contests.",
+      featured: false,
+      tags: ["CodeChef 1477", "Codeforces 1269", "Division Competitions"],
+      order: 3,
+      connectedTo: ["leetcode-knight"]
     }
   ],
 
@@ -215,7 +273,7 @@ export const portfolioData: {
       id: "dsa-algorithmic-suite",
       title: "Algorithmic Problem Solving Suite",
       subtitle: "Core C++ DSA Implementation & Performance Benchmarks",
-      description: "A comprehensive repository of custom-built data structures, graph algorithms, dynamic programming optimizations, and high-performance C++ utility suites tested across 500+ competitive coding benchmarks.",
+      description: "A comprehensive repository of custom-built data structures, graph algorithms, dynamic programming optimizations, and high-performance C++ utility suites tested across 541 competitive coding benchmarks.",
       featured: false,
       technologies: ["C++17", "Data Structures", "Graph Algorithms", "Competitive Programming"],
       githubUrl: "https://github.com/Akash-314",
@@ -252,7 +310,7 @@ export const portfolioData: {
       description: "Pursuing Bachelor of Technology in Information Technology. Focusing deeply on software development, Data Structures & Algorithms, competitive programming, and practical technology projects.",
       details: [
         "Core Focus: C++ Programming, DSA, Systems Architecture",
-        "Active Competitive Programmer with 500+ LeetCode problems solved",
+        "Active Competitive Programmer with 541 LeetCode problems solved",
         "Current Stage: Third Year Undergraduate"
       ]
     },
