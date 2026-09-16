@@ -66,8 +66,15 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
           </span>
         </a>
 
-        {/* Desktop Links */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Desktop Links with Feature 10: Navigation Web Trail */}
+        <nav className="hidden md:flex items-center gap-8 relative py-2">
+          {/* Subtle thin connecting web trail strand */}
+          <div
+            className={`absolute bottom-0 left-2 right-2 h-[1px] pointer-events-none transition-colors duration-300 ${
+              scrolled ? 'bg-red-500/20' : 'bg-red-500/25'
+            }`}
+          />
+
           {navLinks.map((link) => {
             const sectionId = link.href.substring(1);
             const isActive = activeSection === sectionId;
@@ -77,7 +84,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className={`text-xs font-black tracking-widest transition-colors font-sans uppercase ${
+                data-web-target="nav-item"
+                className={`relative py-1 text-xs font-black tracking-widest transition-colors font-sans uppercase ${
                   isActive
                     ? 'text-[#b91c1c]'
                     : scrolled
@@ -86,6 +94,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                 }`}
               >
                 {link.name}
+
+                {/* Gliding active node on web trail */}
+                {isActive && (
+                  <motion.div
+                    layoutId="active-nav-web-node"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#b91c1c] shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+                    <span className="absolute w-4 h-[1px] bg-[#b91c1c]/60 -z-10" />
+                  </motion.div>
+                )}
               </a>
             );
           })}

@@ -119,6 +119,7 @@ export const Contact: React.FC = () => {
                       href={c.link}
                       target={c.link.startsWith('http') ? '_blank' : '_self'}
                       rel="noopener noreferrer"
+                      data-web-target="contact-card"
                       className="p-3 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3 hover:border-[#b91c1c] transition-colors group"
                     >
                       <div className="p-2 rounded-lg bg-white border border-gray-200 text-[#b91c1c] group-hover:scale-110 transition-transform">
@@ -217,6 +218,7 @@ export const Contact: React.FC = () => {
                   <button
                     type="submit"
                     disabled={status === 'submitting'}
+                    data-web-target="cta-button"
                     className="w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
                   >
                     {status === 'submitting' ? (

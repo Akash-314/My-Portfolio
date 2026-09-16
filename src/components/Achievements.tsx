@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Trophy, Star, Award, ChevronRight, Zap } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import type { Achievement } from '../data/portfolio';
 
 export const Achievements: React.FC = () => {
   const { achievements } = usePortfolio();
+  const spotlightRef = useRef<HTMLDivElement | null>(null);
+  const isSpotlightInView = useInView(spotlightRef, { once: true, amount: 0.25 });
+  const [unlockPhase, setUnlockPhase] = useState<0 | 1 | 2 | 3 | 4>(0);
 
   // Selected achievement for spotlight inspection
   const [selectedId, setSelectedId] = useState<string>(
@@ -14,6 +17,20 @@ export const Achievements: React.FC = () => {
 
   const selectedAchievement: Achievement =
     achievements.find((a) => a.id === selectedId) || achievements[0];
+
+  useEffect(() => {
+    if (isSpotlightInView && selectedAchievement?.featured && unlockPhase === 0) {
+      setUnlockPhase(1);
+      const t1 = setTimeout(() => setUnlockPhase(2), 250);
+      const t2 = setTimeout(() => setUnlockPhase(3), 600);
+      const t3 = setTimeout(() => setUnlockPhase(4), 1100);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    }
+  }, [isSpotlightInView, selectedAchievement?.featured, unlockPhase]);
 
   return (
     <section id="achievements" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden">
@@ -128,12 +145,66 @@ export const Achievements: React.FC = () => {
           {selectedAchievement && (
             <motion.div
               key={selectedAchievement.id}
+              ref={spotlightRef}
+              data-web-target="achievement-card"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.35 }}
+              style={{
+                boxShadow: unlockPhase === 3 ? '0 0 28px rgba(220, 38, 38, 0.25)' : undefined,
+                transition: 'box-shadow 0.4s ease'
+              }}
               className="spydyy-card p-8 sm:p-12 border-2 border-red-500/60 relative overflow-hidden bg-gradient-to-br from-white via-white to-red-50/30"
             >
+              {/* Feature 8: Step 2 Thin Web Line Perimeter Draw */}
+              {selectedAchievement.featured && (
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none rounded-3xl"
+                  style={{ overflow: 'visible' }}
+                >
+                  <motion.rect
+                    x="1"
+                    y="1"
+                    width="calc(100% - 2px)"
+                    height="calc(100% - 2px)"
+                    rx="24"
+                    fill="none"
+                    stroke="#dc2626"
+                    strokeWidth="1.5"
+                    strokeDasharray="1400"
+                    initial={{ strokeDashoffset: 1400 }}
+                    animate={{ strokeDashoffset: unlockPhase >= 2 ? 0 : 1400 }}
+                    transition={{ duration: 0.55, ease: 'easeInOut' }}
+                  />
+                </svg>
+              )}
+
+              {/* Feature 8: Step 1 & 3 Unlock Node / Badge */}
+              {selectedAchievement.featured && (
+                <div className="absolute top-4 right-4 z-20 pointer-events-none">
+                  <AnimatePresence>
+                    {unlockPhase >= 1 && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex items-center gap-1.5"
+                      >
+                        {unlockPhase >= 3 ? (
+                          <span className="px-3 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-red-600 text-white shadow-sm flex items-center gap-1.5 border border-red-500">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                            ACHIEVEMENT UNLOCKED
+                          </span>
+                        ) : (
+                          <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 {/* Left Trophy/Medal Badge */}
                 <div className="lg:col-span-4 flex justify-center">

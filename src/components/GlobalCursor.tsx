@@ -253,17 +253,23 @@ export const GlobalCursor: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Tactile Click Shockwave Ripples */}
+      {/* 2. Tactile Spider-Web Click Ripples */}
       {clickRipples.map((ripple) => (
         <div
           key={ripple.id}
-          className="fixed pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2"
+          className="fixed pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 select-none"
           style={{ left: ripple.x, top: ripple.y }}
         >
-          <div
-            className="w-10 h-10 rounded-full border-2 border-red-600/80 animate-ping"
-            style={{ animationDuration: '400ms' }}
-          />
+          <div className="relative w-12 h-12 flex items-center justify-center animate-ping" style={{ animationDuration: '380ms' }}>
+            <svg viewBox="0 0 48 48" className="w-full h-full stroke-red-600/80 fill-none">
+              <circle cx="24" cy="24" r="10" strokeWidth="0.8" strokeDasharray="3 2" />
+              <circle cx="24" cy="24" r="18" strokeWidth="0.8" />
+              <line x1="24" y1="4" x2="24" y2="44" strokeWidth="0.8" />
+              <line x1="4" y1="24" x2="44" y2="24" strokeWidth="0.8" />
+              <line x1="10" y1="10" x2="38" y2="38" strokeWidth="0.8" />
+              <line x1="10" y1="38" x2="38" y2="10" strokeWidth="0.8" />
+            </svg>
+          </div>
         </div>
       ))}
     </>

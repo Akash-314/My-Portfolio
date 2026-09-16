@@ -14,6 +14,8 @@ import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { GlobalCursor } from './components/GlobalCursor';
+import { GlobalWebNetwork } from './components/effects/GlobalWebNetwork';
+import { ScrollProgressSpider } from './components/effects/ScrollProgressSpider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 const AdminDashboard = lazy(() =>
@@ -135,6 +137,12 @@ function PortfolioMain() {
     <div className="relative min-h-screen bg-[#fcfcfc] text-[#111827] font-sans overflow-x-hidden">
       {/* Global Interactive Cursor Reticle across entire document */}
       <GlobalCursor />
+
+      {/* Feature 2 & 3: Cursor-reactive Full-Page Web Network and Connection Strands */}
+      <GlobalWebNetwork />
+
+      {/* Feature 22: Scroll Progress Spider on Right Viewport Edge */}
+      <ScrollProgressSpider />
 
       {/* Initial Loader */}
       {loading ? (

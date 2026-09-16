@@ -38,6 +38,22 @@ export const CodingStats: React.FC = () => {
     lastUpdated: codingStats.lastUpdated || 'Archive Verified'
   });
 
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const isSectionInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'detected' | 'synced'>('idle');
+
+  useEffect(() => {
+    if (isSectionInView && scanStatus === 'idle') {
+      setScanStatus('scanning');
+      const t1 = setTimeout(() => setScanStatus('detected'), 650);
+      const t2 = setTimeout(() => setScanStatus('synced'), 1300);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, [isSectionInView, scanStatus]);
+
   // Attempt non-blocking background fetch from official/public APIs
   useEffect(() => {
     let isMounted = true;
@@ -72,12 +88,47 @@ export const CodingStats: React.FC = () => {
         </div>
 
         {/* Dashboard Box */}
-        <div className="spydyy-card p-6 sm:p-10 border border-gray-200">
+        <div ref={sectionRef} className="spydyy-card p-6 sm:p-10 border border-gray-200 relative overflow-hidden">
+          {/* Feature 9: Spider-Man Data Scan Line */}
+          {(scanStatus === 'scanning' || scanStatus === 'detected') && (
+            <motion.div
+              initial={{ top: '0%', opacity: 0 }}
+              animate={{ top: '100%', opacity: [0, 1, 1, 0] }}
+              transition={{ duration: 1.2, ease: 'linear' }}
+              className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_12px_rgba(239,68,68,0.7)] pointer-events-none z-30"
+            >
+              <span className="absolute left-1/2 -translate-x-1/2 -top-1 w-2 h-2 rounded-full bg-red-400 shadow-[0_0_8px_#ef4444]" />
+            </motion.div>
+          )}
+
           <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-8 border-b border-gray-200 font-mono text-xs text-gray-600">
             <div className="flex items-center gap-2 text-[#b91c1c] font-bold">
               <Terminal className="w-4 h-4" /> CODE_METRICS_HUD // C++ CORE
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              {/* Feature 9: Telemetry Scan Status Badge */}
+              {scanStatus !== 'idle' && (
+                <span
+                  className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase transition-all duration-300 flex items-center gap-1.5 ${
+                    scanStatus === 'scanning'
+                      ? 'bg-red-100 text-red-700 border border-red-300'
+                      : scanStatus === 'detected'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      scanStatus === 'synced' ? 'bg-emerald-600' : 'bg-red-500 animate-ping'
+                    }`}
+                  />
+                  {scanStatus === 'scanning'
+                    ? 'SCANNING WEB...'
+                    : scanStatus === 'detected'
+                    ? 'DATA DETECTED'
+                    : 'WEB DATA SYNCED ✓'}
+                </span>
+              )}
               {liveInfo.isLive ? (
                 <span className="text-emerald-600 font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -99,6 +150,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.leetcodeUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-web-target="coding-card"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -123,6 +175,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.leetcodeUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-web-target="coding-card"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -149,6 +202,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.codeforcesUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-web-target="coding-card"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -174,6 +228,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.codechefUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-web-target="coding-card"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
