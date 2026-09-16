@@ -96,6 +96,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [copiedCode, setCopiedCode] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
+    title: string;
+    itemName: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  const requestDelete = (title: string, itemName: string, onConfirm: () => void) => {
+    setDeleteConfirmModal({
+      title,
+      itemName,
+      onConfirm: () => {
+        onConfirm();
+        setDeleteConfirmModal(null);
+      }
+    });
+  };
 
   // Resume Form State
   const [resumeUrlInput, setResumeUrlInput] = useState(
@@ -1753,9 +1769,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(`Delete skill "${s.name}"?`)) deleteSkill(s.id);
-                          }}
+                          onClick={() =>
+                            requestDelete('Delete Skill', s.name, () => {
+                              deleteSkill(s.id);
+                              triggerToast(`Skill "${s.name}" deleted.`);
+                            })
+                          }
                           className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
                           title="Delete Skill"
                         >
@@ -1882,9 +1901,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (confirm(`Delete project "${p.title}"?`)) deleteProject(p.id);
-                              }}
+                              onClick={() =>
+                                requestDelete('Delete Project', p.title, () => {
+                                  deleteProject(p.id);
+                                  triggerToast(`Project "${p.title}" deleted.`);
+                                })
+                              }
                               className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
                               title="Delete Project"
                             >
@@ -2249,9 +2271,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(`Remove achievement "${a.title}" from chain?`)) deleteAchievement(a.id);
-                          }}
+                          onClick={() =>
+                            requestDelete('Remove Achievement', a.title, () => {
+                              deleteAchievement(a.id);
+                              triggerToast(`Achievement "${a.title}" removed.`);
+                            })
+                          }
                           className="p-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
                           title="Delete Achievement"
                         >
@@ -2767,9 +2792,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`Delete milestone "${item.title}"?`)) deleteJourneyMilestone(idx);
-                        }}
+                        onClick={() =>
+                          requestDelete('Delete Milestone', item.title, () => {
+                            deleteJourneyMilestone(idx);
+                            triggerToast(`Milestone "${item.title}" deleted.`);
+                          })
+                        }
                         className="p-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 transition-colors"
                         title="Delete Milestone"
                       >
@@ -2921,10 +2949,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 </div>
                 {messages.length > 0 && (
                   <button
-                    onClick={() => {
-                      if (confirm('Clear all messages in inbox?')) clearAllMessages();
-                    }}
-                    className="px-4 py-2 rounded-xl bg-red-950/60 border border-red-800 text-red-300 hover:text-white text-xs font-mono font-bold flex items-center gap-2 transition-colors self-start"
+                    onClick={() =>
+                      requestDelete('Clear Inbox', 'All messages in inbox', () => {
+                        clearAllMessages();
+                        triggerToast('All messages cleared.');
+                      })
+                    }
+                    className="px-4 py-2 rounded-xl bg-red-950/60 border border-red-800 text-red-300 hover:text-white text-xs font-mono font-bold flex items-center gap-2 transition-colors self-start cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> CLEAR ALL INBOX
                   </button>
@@ -3123,13 +3154,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                   </label>
 
                   <button
-                    onClick={() => {
-                      if (confirm('Reset portfolio to initial defaults? All custom changes will be erased.')) {
+                    onClick={() =>
+                      requestDelete('Factory Reset', 'All custom portfolio data (will revert to initial defaults)', () => {
                         resetToDefaults();
                         triggerToast('Reset to defaults complete.');
-                      }
-                    }}
-                    className="px-5 py-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 text-xs font-mono font-bold flex items-center gap-2"
+                      })
+                    }
+                    className="px-5 py-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 text-xs font-mono font-bold flex items-center gap-2 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" /> FACTORY RESET
                   </button>
@@ -3139,6 +3170,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
           )}
         </main>
       </div>
+
+      {/* In-App Stark HUD Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteConfirmModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="w-full max-w-md bg-[#0c1017] border border-red-500/40 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
+            >
+              <div className="flex items-start gap-3.5 mb-4">
+                <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-400">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono tracking-widest text-red-400 uppercase font-semibold">
+                    SECURITY PROTOCOL // CONFIRM ACTION
+                  </span>
+                  <h3 className="text-lg font-bold text-white tracking-wide">
+                    {deleteConfirmModal.title}
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-300 font-sans leading-relaxed mb-6">
+                Are you sure you want to delete{' '}
+                <span className="font-bold text-white">"{deleteConfirmModal.itemName}"</span>? This action will take effect immediately.
+              </p>
+
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmModal(null)}
+                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-mono font-bold transition-colors cursor-pointer"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="button"
+                  onClick={deleteConfirmModal.onConfirm}
+                  className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-mono font-bold tracking-wider uppercase transition-colors flex items-center gap-2 shadow-lg shadow-red-600/25 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> CONFIRM DELETE
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
