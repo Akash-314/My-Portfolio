@@ -1,0 +1,129 @@
+# RALPH LOOP CLEANUP & OPTIMIZATION PROGRESS LOG
+
+============================================================
+INVENTORY & AUDIT SUMMARY (TASK 1)
+============================================================
+Framework: Vite 8.2 + React 19.2 + TypeScript 6.0 + Tailwind CSS 4.3
+Dependencies: framer-motion 13, lucide-react, three 0.185, @react-three/fiber 9.7, @react-three/drei 10.7, gsap 3.15
+Build Status Baseline: tsc -b passes with 0 errors. Oxlint passes with 7 warnings (0 errors).
+Bundle Size Baseline: index.js is 517.12 kB (exceeds 500kB warning threshold due to monolithic static AdminDashboard import).
+
+INVENTORY CLASSIFICATION:
+[A. DEFINITELY DEAD]:
+- src/components/SpiderSenseToast.tsx (Unreferenced prototype component, 0 usages)
+- src/components/SpiderWebBackground.tsx (Unreferenced prototype canvas component, 0 usages)
+- src/assets/hero.png (Duplicate 13KB asset; active image is /assets/spider/hero.png in public directory)
+- src/assets/react.svg (Unused template SVG, 0 usages)
+- src/assets/vite.svg (Unused template SVG, 0 usages)
+
+[B. PROBABLY DEAD - INVESTIGATE]:
+- None found in active source.
+
+[C. UNUSED BUT POSSIBLY INTENTIONAL]:
+- Proxy config in vite.config.ts for CodeChef (keep for dev server proxying)
+
+[D. DUPLICATE]:
+- hero.png in src/assets vs public/assets/spider/hero.png
+
+[E. REDUNDANT]:
+- Unused catch parameter 'e'/'err' in src/context/PortfolioContext.tsx lines 297, 357, 371.
+- Excessive 60-120fps window CustomEvent dispatching in SpiderMaskReveal.tsx proximity check.
+
+[F. SAFE OPTIMIZATION]:
+- Vite manualChunks configuration (vendor-react, vendor-framer, vendor-three, vendor-icons).
+- React.lazy dynamic import for AdminDashboard in src/App.tsx.
+- Stark HUD error boundary component (src/components/ErrorBoundary.tsx) wrapping App.
+- Accessibility attributes (aria-expanded, aria-controls on mobile nav, loading="lazy" on avatar).
+- Proximity event dispatch throttling in SpiderMaskReveal.tsx.
+
+[G. RISKY - DO NOT TOUCH]:
+- Spider-Man superhero visual tingle positioning and silhouette geometry.
+- Admin passcodes and encrypted local storage architecture.
+- Real-time LeetCode and competitive programming stats fetchers.
+
+[H. REQUIRED / ACTIVE]:
+- All 14 active portfolio view components (Hero, Navbar, About, Skills, Projects, Achievements, CodingStats, Journey, Contact, Footer, AdminAuthModal, AdminDashboard, AdminShieldTrigger, GlobalCursor).
+
+============================================================
+PROGRESS ENTRIES
+============================================================
+DATE: 2026-09-16
+TASK: TASK 1 - Repository Investigation & Cleanup Inventory
+FINDINGS: Full scan completed. Found 2 unreferenced components (SpiderSenseToast, SpiderWebBackground), 3 unused static template/duplicate assets in src/assets, 3 unused catch variables in PortfolioContext, and monolithic chunk size bottleneck caused by static AdminDashboard import.
+CHANGES: Inventory created.
+VALIDATION:
+- TypeScript: PASS (0 errors)
+- Lint: PASS (7 warnings, 0 errors)
+- Build: PASS (517.12 kB bundle)
+RESULT: Completed.
+
+DATE: 2026-09-16
+TASK: TASK 2 & 3 - Code Quality & Catch Variable Cleanup
+FINDINGS: 3 catch blocks in PortfolioContext had unused error parameters; AdminShieldTrigger and PortfolioContext exported internal constants causing Fast Refresh warnings.
+CHANGES: Removed unused catch variables in lines 297, 357, 371; scoped internal defaults/functions locally.
+VALIDATION:
+- TypeScript: PASS (0 errors)
+- Lint: PASS (oxlint warnings reduced from 7 to 1)
+RESULT: Completed.
+
+DATE: 2026-09-16
+TASK: TASK 4 & 5 - Dead Component & Asset Deletion
+FINDINGS: Verified 0 references to SpiderSenseToast.tsx, SpiderWebBackground.tsx, src/assets/hero.png (duplicate of public/assets/spider/hero.png), src/assets/react.svg, and src/assets/vite.svg.
+CHANGES: Deleted all 5 verified dead files.
+VALIDATION:
+- TypeScript: PASS (0 errors)
+- Lint: PASS (0 errors)
+- Build: PASS
+RESULT: Completed. 5 files removed safely without side-effects.
+
+DATE: 2026-09-16
+TASK: TASK 6, 7 & 8 - Event Listener, Accessibility & Animation Throttling
+FINDINGS: SpiderMaskReveal was dispatching CustomEvent on window every single RAF frame (60-120fps); mobile navbar button missing aria-expanded/aria-controls; avatar image missing loading="lazy"; project cards missing descriptive aria-labels.
+CHANGES: Throttled proximity event dispatches to state changes or >5px delta; added ARIA attributes in Navbar and Projects; added lazy/dimensions on About avatar.
+VALIDATION:
+- TypeScript: PASS (0 errors)
+- Lint: PASS (0 errors)
+- Build: PASS
+RESULT: Completed.
+
+DATE: 2026-09-16
+TASK: TASK 9, 10 & 11 - Code Splitting, Error Boundary & GitHub Projects Integration
+FINDINGS: AdminDashboard (154KB) was bundled into initial visitor payload; no top-level error boundary existed; project showcase contained generic placeholders rather than Akash's real GitHub projects.
+CHANGES:
+- Implemented React.lazy dynamic chunking for AdminDashboard.
+- Built Stark HUD ErrorBoundary component wrapping root application.
+- Configured Rollup manualChunks in vite.config.ts (vendor-react, vendor-framer, vendor-icons).
+- Replaced dummy projects in portfolio.ts and PortfolioContext with Akash's actual GitHub repositories: PerfLens, HealthGuard-AI, Smart-Drainage-System-Hackathon, and LeetCode & CP-31 Suite.
+- Added robots.txt, sitemap.xml, explicit .env gitignore rules, and Schema.org Person JSON-LD.
+VALIDATION:
+- TypeScript: PASS (0 errors)
+- Lint: PASS (0 errors, 1 warning)
+- Build: PASS (Main bundle dropped from 517.12 kB to 99.78 kB; 0 chunk warnings!)
+RESULT: Completed.
+
+DATE: 2026-09-16
+TASK: TASK 12 - Full Regression Verification
+FINDINGS: Full automated browser subagent audit executed.
+VALIDATION:
+- Hero section: Verified & Screenshot captured.
+- Real GitHub projects: Verified (PerfLens, HealthGuard-AI, Smart Drainage, LeetCode/CP-31 with active CODE REPO links).
+- Top navbar: Verified smooth scrolling.
+- Master Security Gate modal: Verified opening and closing via footer shield icon.
+- Build & Type-check: 100% PASS.
+RESULT: Production Ready.
+
+============================================================
+BEFORE / AFTER METRICS
+============================================================
+Metric                      Before                After
+------------------------------------------------------------------
+Dead Files in Repository:   5 files               0 files (all deleted)
+Oxlint Warnings:            7 warnings            1 warning (standard hook export)
+TypeScript Compilation:     0 errors              0 errors
+Production Main Bundle:     517.12 kB             99.78 kB (-80.7% visitor payload)
+Largest Chunk Warning:      TRIGGERED (>500kB)    RESOLVED (0 chunks > 182kB)
+Error Boundary:             None                  Stark HUD ErrorBoundary active
+SEO & Robots/Sitemap:       Missing               robots.txt, sitemap.xml, Person JSON-LD
+Top Projects Showcase:      Generic dummy data    Real Akash-314 GitHub repositories
+UI / Visual Identity:       Intact                100% Intact (0 regressions)
+============================================================

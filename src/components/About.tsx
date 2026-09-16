@@ -82,6 +82,10 @@ export const About: React.FC = () => {
                 <img
                   src="/assets/spider/hero.png"
                   alt="Akash Kumar Profile"
+                  loading="lazy"
+                  decoding="async"
+                  width={320}
+                  height={320}
                   className="w-full h-full object-cover object-top"
                 />
               </div>

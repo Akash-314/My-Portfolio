@@ -11,7 +11,7 @@ interface AdminShieldTriggerProps {
 /**
  * Universal trigger to open the Admin Security Gate from any shield instance
  */
-export const openAdminGate = () => {
+const openAdminGate = () => {
   window.dispatchEvent(new CustomEvent('spydyy-open-admin'));
   if (window.location.hash !== '#admin') {
     window.history.pushState(null, '', '#admin');

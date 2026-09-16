@@ -65,7 +65,7 @@ export interface SpiderSenseSettings {
   cursorTargetLock: boolean;
 }
 
-export const defaultSpiderSenseSettings: SpiderSenseSettings = {
+const defaultSpiderSenseSettings: SpiderSenseSettings = {
   triggerRadius: 250,
   sensitivity: 8,
   maxAmplitude: 2.8,
@@ -86,7 +86,7 @@ export interface ResumeSettings {
   updatedAt?: string;
 }
 
-export const defaultResumeSettings: ResumeSettings = {
+const defaultResumeSettings: ResumeSettings = {
   sourceType: 'local',
   url: initialPortfolioData.personal.contact.resumePath || '/resume.pdf',
   fileName: 'Akash_Kumar_Resume.pdf',
@@ -178,7 +178,13 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [projects, setProjects] = useState<Project[]>(() => {
     try {
       const saved = localStorage.getItem(`${STORAGE_DATA_KEY}_projects`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: Project[] = JSON.parse(saved);
+        if (parsed.some((p) => p.id === 'dsa-algorithmic-suite' || p.id === 'web-dev-application')) {
+          return initialPortfolioData.projects;
+        }
+        return parsed;
+      }
     } catch (e) {
       console.error('Error loading projects from localStorage:', e);
     }
@@ -294,7 +300,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [uploadedResumeData, setUploadedResumeData] = useState<string | null>(() => {
     try {
       return localStorage.getItem(`${STORAGE_DATA_KEY}_resume_file`);
-    } catch (e) {
+    } catch {
       return null;
     }
   });
@@ -354,7 +360,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           });
           resolve({ success: true, message: `Successfully uploaded ${file.name} (${sizeStr})!` });
-        } catch (err) {
+        } catch {
           resolve({ success: false, message: 'Browser storage limit exceeded. Use a Google Drive URL for large files.' });
         }
       };
@@ -368,7 +374,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const resetResumeToDefault = () => {
     try {
       localStorage.removeItem(`${STORAGE_DATA_KEY}_resume_file`);
-    } catch (e) {}
+    } catch {}
     setUploadedResumeData(null);
     setResumeSettings(defaultResumeSettings);
   };

@@ -93,11 +93,14 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
 
         {/* Mobile Hamburger Toggle */}
         <button
+          type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className={`md:hidden p-2 rounded-lg focus:outline-none transition-colors ${
             scrolled ? 'text-gray-300 hover:text-white' : 'text-[#111827]'
           }`}
           aria-label="Toggle Menu"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-nav-menu"
         >
           {mobileMenuOpen ? (
             <X className="w-6 h-6 text-red-500" />
@@ -111,6 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            id="mobile-nav-menu"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}

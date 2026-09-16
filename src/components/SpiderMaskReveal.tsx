@@ -187,6 +187,7 @@ export const SpiderMaskReveal: React.FC<SpiderMaskRevealProps> = ({
   const targetIntensityRef = useRef<number>(0);
   const isNearFaceRef = useRef<boolean>(false);
   const lastNearFaceRef = useRef<boolean>(false);
+  const lastDistanceRef = useRef<number>(0);
 
   // Detect touch devices (disable cursor Spider-Sense on touch)
   useEffect(() => {
@@ -336,9 +337,12 @@ export const SpiderMaskReveal: React.FC<SpiderMaskRevealProps> = ({
           isNearFaceRef.current = false;
         }
 
-        // Broadcast proximity event for GlobalCursor HUD synchronization
-        if (isNearFaceRef.current !== lastNearFaceRef.current || isNearFaceRef.current) {
+        // Broadcast proximity event for GlobalCursor HUD synchronization (throttled to state change or delta > 5px)
+        const stateChanged = isNearFaceRef.current !== lastNearFaceRef.current;
+        const distDelta = Math.abs(distance - lastDistanceRef.current);
+        if (stateChanged || (isNearFaceRef.current && distDelta >= 5)) {
           lastNearFaceRef.current = isNearFaceRef.current;
+          lastDistanceRef.current = distance;
           window.dispatchEvent(
             new CustomEvent('spydyy-spider-sense-proximity', {
               detail: {

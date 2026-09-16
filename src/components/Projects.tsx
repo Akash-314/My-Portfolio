@@ -86,6 +86,7 @@ export const Projects: React.FC = () => {
                       href={project.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`${project.title} GitHub Repository`}
                       className="text-xs font-extrabold text-[#111827] hover:text-[#b91c1c] flex items-center gap-1.5 transition-colors"
                     >
                       <GithubIcon className="w-4 h-4" /> CODE REPO
@@ -99,6 +100,7 @@ export const Projects: React.FC = () => {
                       href={project.liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`${project.title} Live Demo`}
                       className="text-xs font-extrabold text-[#b91c1c] hover:text-[#991b1b] flex items-center gap-1 transition-colors"
                     >
                       <Globe className="w-3.5 h-3.5" /> LIVE DEMO

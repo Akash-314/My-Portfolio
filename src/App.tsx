@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext';
 import { Loader } from './components/Loader';
 import { Navbar } from './components/Navbar';
@@ -13,8 +13,12 @@ import { Journey } from './components/Journey';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
-import { AdminDashboard } from './components/admin/AdminDashboard';
 import { GlobalCursor } from './components/GlobalCursor';
+import { ErrorBoundary } from './components/ErrorBoundary';
+
+const AdminDashboard = lazy(() =>
+  import('./components/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard }))
+);
 
 function PortfolioMain() {
   const { isAuthenticated } = usePortfolio();
@@ -120,7 +124,11 @@ function PortfolioMain() {
 
   // If Admin is authenticated and open, display full-screen Command Center Dashboard
   if (isAdminOpen && isAuthenticated) {
-    return <AdminDashboard onExit={handleExitAdmin} />;
+    return (
+      <Suspense fallback={<Loader onFinish={() => {}} />}>
+        <AdminDashboard onExit={handleExitAdmin} />
+      </Suspense>
+    );
   }
 
   return (
@@ -171,9 +179,11 @@ function PortfolioMain() {
 
 export function App() {
   return (
-    <PortfolioProvider>
-      <PortfolioMain />
-    </PortfolioProvider>
+    <ErrorBoundary>
+      <PortfolioProvider>
+        <PortfolioMain />
+      </PortfolioProvider>
+    </ErrorBoundary>
   );
 }
 
