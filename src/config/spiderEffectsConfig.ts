@@ -38,5 +38,16 @@ export const SPIDER_EFFECTS_CONFIG = {
   CLICK_RIPPLE_MAX_SIZE: 70, // px
 
   // 8. General Performance & Safety
-  SMOOTHING_FACTOR: 0.08
+  SMOOTHING_FACTOR: 0.08,
+
+  // 9. Scroll Velocity & Web Swing Dynamics (Feature 25)
+  SCROLL_ROTATION_MAX: 3.5, // Max 3.5 degrees hanging pendulum swing on desktop
+  SCROLL_ROTATION_MAX_MOBILE: 1.5, // Capped to 1.5 degrees on mobile/tablet
+  SCROLL_VELOCITY_SMOOTHING: 0.12, // Damping factor for velocity smoothing
+  SCROLL_SPRING_DAMPING: 0.88, // Decay momentum rate when scrolling stops
+  SCROLL_SPRING_STIFFNESS: 0.10, // Restoring spring force toward neutral
+  WEB_TENSION_SAG: 5.0, // Max px horizontal sag displacement for the web strand
+  HERO_PARALLAX_MAX: 18, // Max px subtle vertical parallax depth for Hero
+  PROJECTS_PARALLAX_MAX: 10 // Max px subtle vertical parallax depth for Projects
 } as const;
+

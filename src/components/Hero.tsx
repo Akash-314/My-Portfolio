@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Compass } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
@@ -7,6 +7,8 @@ import { CornerWebTopLeft, CornerWebBottomRight } from './SpiderManSuspensions';
 import { SpiderMaskReveal } from './SpiderMaskReveal';
 import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 import { WebMagneticButton } from './WebMagneticButton';
+import { SPIDER_EFFECTS_CONFIG } from '../config/spiderEffectsConfig';
+import { globalScrollPhysics, type ScrollPhysicsState } from '../utils/scrollPhysics';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -18,6 +20,60 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
   const effectiveResumePath = resumeUrl || personal.contact.resumePath;
   const isExternalUrl =
     effectiveResumePath.startsWith('http://') || effectiveResumePath.startsWith('https://');
+
+  const heroRef = useRef<HTMLElement | null>(null);
+  const heroSuitWrapperRef = useRef<HTMLDivElement | null>(null);
+  const cornerWebsWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Subtle Hero Parallax (Section 10: 5–20px total, 0° rotation strictly grounded)
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion || !heroRef.current) return;
+
+    let unsubscribeScroll: (() => void) | null = null;
+
+    const onScrollPhysics = (state: ScrollPhysicsState) => {
+      const scrollY = state.scrollY;
+      if (scrollY <= window.innerHeight * 1.3) {
+        const heroY = Math.min(SPIDER_EFFECTS_CONFIG.HERO_PARALLAX_MAX, scrollY * 0.035);
+        const webY = Math.min(10, scrollY * 0.02);
+        if (heroSuitWrapperRef.current) {
+          heroSuitWrapperRef.current.style.transform = `translate3d(0, ${heroY.toFixed(1)}px, 0)`;
+        }
+        if (cornerWebsWrapperRef.current) {
+          cornerWebsWrapperRef.current.style.transform = `translate3d(0, ${webY.toFixed(1)}px, 0)`;
+        }
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!unsubscribeScroll) {
+            unsubscribeScroll = globalScrollPhysics.subscribe(onScrollPhysics);
+          }
+        } else {
+          if (unsubscribeScroll) {
+            unsubscribeScroll();
+            unsubscribeScroll = null;
+          }
+        }
+      },
+      { rootMargin: '100px 0px' }
+    );
+
+    observer.observe(heroRef.current);
+
+    return () => {
+      observer.disconnect();
+      if (unsubscribeScroll) {
+        unsubscribeScroll();
+      }
+    };
+  }, []);
 
   const handleResumeClick = () => {
     if (!isExternalUrl && !effectiveResumePath.startsWith('data:')) {
@@ -35,20 +91,31 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
 
   return (
     <section
+      ref={heroRef}
       id="hero"
       className="relative w-screen h-screen min-h-screen flex items-center justify-center pt-16 bg-[#fcfcfc] overflow-hidden"
     >
-      {/* Full Page 100vw x 100vh Spider-Man Suit Background */}
-      <div className="absolute inset-0 w-full h-full z-0">
+      {/* Full Page 100vw x 100vh Spider-Man Suit Background with subtle parallax */}
+      <div
+        ref={heroSuitWrapperRef}
+        className="absolute inset-0 w-full h-full z-0 will-change-transform"
+        style={{ transition: 'transform 0.05s linear' }}
+      >
         <SpiderMaskReveal
           spidermanImage="/assets/spider/hero.png"
           className="w-full h-full"
         />
       </div>
 
-      {/* Corner Spider Web Graphic SVGs */}
-      <CornerWebTopLeft className="w-80 sm:w-[500px]" />
-      <CornerWebBottomRight className="w-80 sm:w-[500px]" />
+      {/* Corner Spider Web Graphic SVGs with subtle parallax */}
+      <div
+        ref={cornerWebsWrapperRef}
+        className="absolute inset-0 w-full h-full pointer-events-none z-10 will-change-transform"
+        style={{ transition: 'transform 0.05s linear' }}
+      >
+        <CornerWebTopLeft className="w-80 sm:w-[500px]" />
+        <CornerWebBottomRight className="w-80 sm:w-[500px]" />
+      </div>
 
       {/* Foreground Hero Text Content & Action Buttons */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-20 pointer-events-none">
