@@ -29,6 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
     { name: 'PROJECTS', href: '#projects' },
     { name: 'ACHIEVEMENTS', href: '#achievements' },
     { name: 'CODING', href: '#coding' },
+    { name: 'JOURNEY', href: '#journey' },
     { name: 'CONTACT', href: '#contact' },
   ];
 
@@ -67,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
         </a>
 
         {/* Desktop Links with Feature 10: Navigation Web Trail */}
-        <nav className="hidden md:flex items-center gap-8 relative py-2">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 relative py-2">
           {/* Subtle thin connecting web trail strand */}
           <div
             className={`absolute bottom-0 left-2 right-2 h-[1px] pointer-events-none transition-colors duration-300 ${

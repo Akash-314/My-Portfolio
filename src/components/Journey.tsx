@@ -36,7 +36,7 @@ export const Journey: React.FC = () => {
               >
                 {/* Timeline Node Icon */}
                 <div
-                  className={`absolute -left-[37px] sm:-left-[45px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-2 bg-white shadow-md ${
+                  className={`cursor-target absolute -left-[37px] sm:-left-[45px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-2 bg-white shadow-md ${
                     isEducation
                       ? 'border-blue-600 text-blue-600'
                       : 'border-[#b91c1c] text-[#b91c1c]'
@@ -50,7 +50,7 @@ export const Journey: React.FC = () => {
                 </div>
 
                 {/* Content Box */}
-                <div className="spydyy-card p-6">
+                <div className="cursor-target spydyy-card p-6">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-red-50 border border-red-200 text-xs font-mono font-bold text-[#b91c1c]">
                       <Calendar className="w-3 h-3 text-[#b91c1c]" /> {item.period}

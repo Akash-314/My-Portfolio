@@ -89,7 +89,7 @@ export const Achievements: React.FC = () => {
                     key={ach.id}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setSelectedId(ach.id)}
-                    className={`cursor-pointer p-4 rounded-2xl border-2 transition-all relative ${
+                    className={`cursor-target cursor-pointer p-4 rounded-2xl border-2 transition-all relative ${
                       isSelected
                         ? 'border-[#b91c1c] bg-red-50/50 shadow-lg shadow-red-900/10'
                         : 'border-gray-200 bg-gray-50/70 hover:border-red-300 hover:bg-white'

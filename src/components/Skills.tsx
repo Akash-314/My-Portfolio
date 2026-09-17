@@ -31,7 +31,7 @@ export const Skills: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="spydyy-card p-5 flex items-center justify-between group"
+                className="cursor-target spydyy-card p-5 flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
                   <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${skill.highlight ? 'bg-[#b91c1c] ring-4 ring-red-100' : 'bg-gray-400'}`} />
