@@ -19,7 +19,17 @@
   transform: translate(-50%, -50%);
   will-change: transform;
   box-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
-  transition: background-color 0.15s ease-out, transform 0.15s ease-out;
+  transition: background-color 0.15s ease-out;
+}
+
+.target-cursor-rotator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+  transform-origin: 0 0;
 }
 
 .target-cursor-corner {

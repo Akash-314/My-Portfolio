@@ -18,11 +18,12 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
   spinDuration = 3,
   hideDefaultCursor = true,
   hoverDuration = 0.18,
-  parallaxOn = true,
+  parallaxOn = false,
   cursorColor = '#0f172a',
   cursorColorOnTarget = '#dc2626',
 }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
+  const rotatorRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const cornersRef = useRef<HTMLDivElement[]>([]);
   const spinTl = useRef<gsap.core.Timeline | null>(null);
@@ -45,7 +46,7 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
   const cornerSize = 12;
   const borderWidth = 2;
 
-  // Ambient rest coordinates relative to cursor center (32px x 32px square)
+  // Symmetrical 32px x 32px ambient square coordinates
   const ambientPositions = useMemo(
     () => [
       { x: -16, y: -16 }, // Top-Left
@@ -57,12 +58,13 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
   );
 
   useEffect(() => {
-    if (isMobile || !cursorRef.current) return;
+    if (isMobile || !cursorRef.current || !rotatorRef.current) return;
 
     const cursor = cursorRef.current;
+    const rotator = rotatorRef.current;
     const dot = dotRef.current;
     const corners = Array.from(
-      cursor.querySelectorAll<HTMLDivElement>('.target-cursor-corner')
+      rotator.querySelectorAll<HTMLDivElement>('.target-cursor-corner')
     );
     cornersRef.current = corners;
 
@@ -70,12 +72,11 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       document.body.classList.add('target-cursor-active');
     }
 
-    // Initialize cursor wrapper offscreen
+    // Initialize root cursor wrapper (NEVER rotates)
     gsap.set(cursor, {
       x: -100,
       y: -100,
       opacity: 0,
-      scale: 1,
     });
 
     // Initialize ambient corners
@@ -87,30 +88,35 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       });
     });
 
-    // Continuous ambient rotation timeline
-    const startSpin = () => {
+    // Ambient spin on rotator only
+    const startAmbientSpin = () => {
       if (spinTl.current) spinTl.current.kill();
+      gsap.killTweensOf(rotator, 'rotation');
       spinTl.current = gsap
         .timeline({ repeat: -1 })
-        .to(cursor, { rotation: '+=360', duration: spinDuration, ease: 'none' });
+        .to(rotator, { rotation: '+=360', duration: spinDuration, ease: 'none' });
     };
 
-    startSpin();
+    startAmbientSpin();
 
-    // GSAP quickTo setters for ultra-fast, lag-free cursor tracking
-    const setCursorX = gsap.quickTo(cursor, 'x', { duration: 0.05, ease: 'power2.out' });
-    const setCursorY = gsap.quickTo(cursor, 'y', { duration: 0.05, ease: 'power2.out' });
+    // High performance cursor position setter
+    const setCursorX = gsap.quickTo(cursor, 'x', { duration: 0.03, ease: 'power2.out' });
+    const setCursorY = gsap.quickTo(cursor, 'y', { duration: 0.03, ease: 'power2.out' });
 
     // Lock to target
     const lockToTarget = (target: HTMLElement) => {
       activeTargetRef.current = target;
       isLockedRef.current = true;
 
-      // Pause rotation cleanly and reset to 0
-      spinTl.current?.pause();
-      gsap.to(cursor, { rotation: 0, duration: 0.15, ease: 'power2.out' });
+      // STOP ambient rotation immediately and force rotation to 0
+      if (spinTl.current) {
+        spinTl.current.kill();
+        spinTl.current = null;
+      }
+      gsap.killTweensOf(rotator);
+      gsap.set(rotator, { rotation: 0 });
 
-      // Transition colors to Spider-Man Crimson
+      // Transition to Spider-Man Crimson
       gsap.to(corners, {
         borderColor: cursorColorOnTarget,
         duration: 0.15,
@@ -119,13 +125,12 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       if (dot) {
         gsap.to(dot, {
           backgroundColor: cursorColorOnTarget,
-          scale: 1.1,
           duration: 0.15,
           ease: 'power2.out',
         });
       }
 
-      // Initial smooth snap to target corners
+      // Initial smooth expansion to target corners
       const rect = target.getBoundingClientRect();
       const curX = mousePosRef.current.x;
       const curY = mousePosRef.current.y;
@@ -154,17 +159,20 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       activeTargetRef.current = null;
       isLockedRef.current = false;
 
+      // Ensure rotator is strictly at 0 while retracting
+      gsap.killTweensOf(rotator);
+      gsap.set(rotator, { rotation: 0 });
+
       // Revert colors
       gsap.to(corners, {
         borderColor: cursorColor,
-        duration: 0.2,
+        duration: 0.18,
         ease: 'power2.out',
       });
       if (dot) {
         gsap.to(dot, {
           backgroundColor: '#dc2626',
-          scale: 1,
-          duration: 0.2,
+          duration: 0.18,
           ease: 'power2.out',
         });
       }
@@ -174,80 +182,66 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
         gsap.to(corner, {
           x: ambientPositions[i].x,
           y: ambientPositions[i].y,
-          duration: 0.22,
+          duration: 0.2,
           ease: 'power3.out',
           overwrite: 'auto',
+          onComplete: () => {
+            // Once all 4 corners are back in ambient rest, resume ambient spin
+            if (i === 0 && !isLockedRef.current) {
+              startAmbientSpin();
+            }
+          },
         });
-      });
-
-      // Resume ambient rotation
-      const currentRot = (gsap.getProperty(cursor, 'rotation') as number) || 0;
-      spinTl.current?.resume();
-      gsap.to(cursor, {
-        rotation: currentRot + 360,
-        duration: spinDuration,
-        ease: 'none',
       });
     };
 
-    // Real-time animation ticker for continuous synchronization (handles scroll, tilt, layout shifts)
+    // Real-time animation ticker: keeps corners 100% synchronized with target bounding rect
     const onTick = () => {
       const target = activeTargetRef.current;
       if (!target || !isLockedRef.current) return;
 
-      // Check if target is still connected to document
       if (!target.isConnected) {
         unlockFromTarget();
         return;
       }
 
       const rect = target.getBoundingClientRect();
-      // If target has zero size or scrolled completely offscreen
       if (
         rect.width === 0 ||
         rect.height === 0 ||
-        rect.bottom < -100 ||
-        rect.top > window.innerHeight + 100
+        rect.bottom < -50 ||
+        rect.top > window.innerHeight + 50
       ) {
         unlockFromTarget();
         return;
       }
 
-      // Current cursor position
+      // Root cursor position
       const curX = gsap.getProperty(cursor, 'x') as number;
       const curY = gsap.getProperty(cursor, 'y') as number;
 
-      // Subtle parallax response to mouse position within target
-      let parallaxX = 0;
-      let parallaxY = 0;
+      // Ensure rotator is strictly unrotated during active lock
+      gsap.set(rotator, { rotation: 0 });
+
+      // Subtle micro-parallax if enabled
+      let px = 0;
+      let py = 0;
       if (parallaxOn) {
-        const targetCenterX = rect.left + rect.width / 2;
-        const targetCenterY = rect.top + rect.height / 2;
-        parallaxX = (curX - targetCenterX) * 0.035;
-        parallaxY = (curY - targetCenterY) * 0.035;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        px = (curX - centerX) * 0.02;
+        py = (curY - centerY) * 0.02;
       }
 
-      // Calculate target corner coordinates relative to cursor wrapper
+      // Corner positions relative to mouse position
       const targetPoints = [
-        {
-          x: rect.left - borderWidth - curX + parallaxX,
-          y: rect.top - borderWidth - curY + parallaxY,
-        },
-        {
-          x: rect.right + borderWidth - cornerSize - curX + parallaxX,
-          y: rect.top - borderWidth - curY + parallaxY,
-        },
-        {
-          x: rect.right + borderWidth - cornerSize - curX + parallaxX,
-          y: rect.bottom + borderWidth - cornerSize - curY + parallaxY,
-        },
-        {
-          x: rect.left - borderWidth - curX + parallaxX,
-          y: rect.bottom + borderWidth - cornerSize - curY + parallaxY,
-        },
+        { x: rect.left - borderWidth - curX + px, y: rect.top - borderWidth - curY + py },
+        { x: rect.right + borderWidth - cornerSize - curX + px, y: rect.top - borderWidth - curY + py },
+        { x: rect.right + borderWidth - cornerSize - curX + px, y: rect.bottom + borderWidth - cornerSize - curY + py },
+        { x: rect.left - borderWidth - curX + px, y: rect.bottom + borderWidth - cornerSize - curY + py },
       ];
 
-      // Instantly track during active lock to guarantee 100% scroll and tilt synchronization
+      // Update positions frame-by-frame for exact scroll & tilt synchronization
       corners.forEach((corner, i) => {
         gsap.set(corner, {
           x: targetPoints[i].x,
@@ -264,13 +258,13 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
 
       if (!isVisibleRef.current) {
         isVisibleRef.current = true;
-        gsap.to(cursor, { opacity: 1, duration: 0.15 });
+        gsap.to(cursor, { opacity: 1, duration: 0.12 });
       }
 
       setCursorX(e.clientX);
       setCursorY(e.clientY);
 
-      // Check element under mouse to determine target engagement
+      // Identify target under pointer
       const directTarget = e.target as Element | null;
       const targetElement = directTarget?.closest?.(targetSelector) as HTMLElement | null;
 
@@ -285,7 +279,7 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       }
     };
 
-    // Scroll handler: update target engagement and keep lock intact
+    // Scroll handler: re-verify target engagement
     const handleScroll = () => {
       if (!isVisibleRef.current) return;
       const { x, y } = mousePosRef.current;
@@ -303,27 +297,27 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       }
     };
 
-    // Mouse click feedback
+    // Click feedback
     const handleMouseDown = () => {
-      if (dot) gsap.to(dot, { scale: 0.7, duration: 0.15 });
+      if (dot) gsap.to(dot, { scale: 0.7, duration: 0.12 });
       gsap.to(cursor, { scale: 0.92, duration: 0.12 });
     };
 
     const handleMouseUp = () => {
-      if (dot) gsap.to(dot, { scale: isLockedRef.current ? 1.1 : 1, duration: 0.18 });
-      gsap.to(cursor, { scale: 1, duration: 0.18 });
+      if (dot) gsap.to(dot, { scale: 1, duration: 0.15 });
+      gsap.to(cursor, { scale: 1, duration: 0.15 });
     };
 
-    // Window boundaries: hide cursor when cursor leaves browser
+    // Window edge handlers
     const handleMouseLeaveDoc = () => {
       isVisibleRef.current = false;
-      gsap.to(cursor, { opacity: 0, duration: 0.15 });
+      gsap.to(cursor, { opacity: 0, duration: 0.12 });
       if (isLockedRef.current) unlockFromTarget();
     };
 
     const handleMouseEnterDoc = () => {
       isVisibleRef.current = true;
-      gsap.to(cursor, { opacity: 1, duration: 0.15 });
+      gsap.to(cursor, { opacity: 1, duration: 0.12 });
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
@@ -343,6 +337,7 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
       document.removeEventListener('mouseenter', handleMouseEnterDoc);
 
       spinTl.current?.kill();
+      gsap.killTweensOf(rotator);
       document.body.classList.remove('target-cursor-active');
     };
   }, [
@@ -350,7 +345,6 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
     spinDuration,
     hideDefaultCursor,
     hoverDuration,
-    parallaxOn,
     cursorColor,
     cursorColorOnTarget,
     isMobile,
@@ -369,11 +363,13 @@ export const TargetCursor: React.FC<TargetCursorProps> = ({
         className="target-cursor-dot"
         style={{ backgroundColor: '#dc2626' }}
       />
-      {/* 4 Optical Targeting Corner Brackets */}
-      <div className="target-cursor-corner corner-tl" style={{ borderColor: cursorColor }} />
-      <div className="target-cursor-corner corner-tr" style={{ borderColor: cursorColor }} />
-      <div className="target-cursor-corner corner-br" style={{ borderColor: cursorColor }} />
-      <div className="target-cursor-corner corner-bl" style={{ borderColor: cursorColor }} />
+      {/* Rotator container: ONLY rotates in ambient mode, strictly locked to 0 on target */}
+      <div ref={rotatorRef} className="target-cursor-rotator">
+        <div className="target-cursor-corner corner-tl" style={{ borderColor: cursorColor }} />
+        <div className="target-cursor-corner corner-tr" style={{ borderColor: cursorColor }} />
+        <div className="target-cursor-corner corner-br" style={{ borderColor: cursorColor }} />
+        <div className="target-cursor-corner corner-bl" style={{ borderColor: cursorColor }} />
+      </div>
     </div>,
     document.body
   );
