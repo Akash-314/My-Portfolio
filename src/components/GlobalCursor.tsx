@@ -6,17 +6,17 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
  * ==========================================================
  */
 const BURST_CONFIG = {
-  BURST_SIZE: 34,
-  BURST_DURATION: 400,
+  BURST_SIZE: 42,
+  BURST_DURATION: 460,
   STRAND_COUNT: 8,
-  STRAND_LENGTH: 17,
-  STRAND_OPACITY: 0.85,
+  STRAND_LENGTH: 21,
+  STRAND_OPACITY: 0.95,
   BURST_COLOR: '#0f172a',
   BURST_ACCENT_COLOR: '#dc2626',
   MAX_ACTIVE_BURSTS: 5,
 };
 
-type BurstProfileType = 'admin' | 'cta' | 'project' | 'coding' | 'nav' | 'default';
+type BurstProfileType = 'admin' | 'cta' | 'project' | 'coding' | 'nav' | 'default' | 'ambient';
 
 interface StrandData {
   x2: number;
@@ -64,8 +64,8 @@ function generateWebGeometry(
     const angleJitter = Math.sin(i * 3.7) * 0.08;
     const angle = (2 * Math.PI * i) / strandCount + angleJitter;
 
-    // Organic strand length variation (78% to 105% of base radius)
-    const lengthMult = 0.8 + 0.22 * Math.abs(Math.sin(i * 2.3));
+    // Organic strand length variation (82% to 105% of base radius)
+    const lengthMult = 0.82 + 0.22 * Math.abs(Math.sin(i * 2.3));
     let strandLen = radius * lengthMult;
 
     // Directional bias elongation based on cursor velocity at moment of click (Specification 10)
@@ -81,10 +81,17 @@ function generateWebGeometry(
 
     coords.push({ x: tipX, y: tipY });
 
-    // Spider-Man color logic: thin dark charcoal filaments with crimson accent fiber
-    const isAccentStrand = i === 1 || (strandCount >= 8 && i === 5);
-    const stroke = isAccentStrand ? accentColor : primaryColor;
-    const strokeWidth = isAccentStrand ? 0.9 : 0.85;
+    // High-contrast Spider-Man palette: alternating Crimson, Charcoal, and Silk White
+    let stroke = primaryColor;
+    let strokeWidth = 1.8;
+
+    if (i % 2 === 1) {
+      stroke = accentColor; // Spider-Man Crimson
+      strokeWidth = 2.0;
+    } else if (i === 4) {
+      stroke = '#ffffff'; // White web filament for maximum contrast on dark buttons
+      strokeWidth = 1.6;
+    }
 
     strands.push({
       x2: Number(tipX.toFixed(2)),
@@ -97,7 +104,7 @@ function generateWebGeometry(
 
   // Inter-strand curved web arcs (authentic spider-web cross filaments)
   const arcs: ArcData[] = [];
-  const arcRatio = 0.52;
+  const arcRatio = 0.55;
 
   for (let i = 0; i < strandCount; i++) {
     const nextIdx = (i + 1) % strandCount;
@@ -112,20 +119,20 @@ function generateWebGeometry(
     const bx = p2.x * arcRatio;
     const by = p2.y * arcRatio;
 
-    // Control point pulled inward towards center (0, 0)
+    // Control point pulled inward towards center (0, 0) for signature web sag
     const mx = (ax + bx) / 2;
     const my = (ay + by) / 2;
     const cpx = mx * 0.72;
     const cpy = my * 0.72;
 
     const d = `M ${ax.toFixed(2)} ${ay.toFixed(2)} Q ${cpx.toFixed(2)} ${cpy.toFixed(2)} ${bx.toFixed(2)} ${by.toFixed(2)}`;
-    const isRedArc = i === 0 && accentColor !== primaryColor;
+    const isRedArc = i % 2 === 0;
 
     arcs.push({
       d,
-      stroke: isRedArc ? accentColor : '#475569',
-      strokeWidth: 0.65,
-      opacity: isRedArc ? 0.65 : 0.5,
+      stroke: isRedArc ? accentColor : '#ffffff',
+      strokeWidth: 1.2,
+      opacity: isRedArc ? 0.85 : 0.7,
     });
   }
 
@@ -134,73 +141,76 @@ function generateWebGeometry(
 
 /**
  * Filter and categorize meaningful interactive targets (Specification 3 & 11)
- * Plain text, paragraphs, divs, and decorative elements return null.
+ * Plain paragraphs, headings, and images are ignored.
+ * Interactive elements get targeted profiles, while canvas clicks get subtle ambient sparks.
  */
 function getInteractiveTarget(
   element: Element | null
-): { element: HTMLElement; profile: BurstProfileType } | null {
-  if (!element) return null;
+): { element: HTMLElement | null; profile: BurstProfileType } | null {
+  if (!element) return { element: null, profile: 'ambient' };
 
-  const target = element.closest<HTMLElement>(
-    'button, a, [role="button"], [data-web-target], .cursor-target, input[type="submit"], input[type="button"]'
-  );
-
-  if (!target) return null;
-
-  const webTarget = target.getAttribute('data-web-target') || '';
-  const ariaLabel = target.getAttribute('aria-label') || '';
-  const href = target.getAttribute('href') || '';
-  const textContent = target.textContent?.trim().toUpperCase() || '';
+  // Explicitly ignore paragraphs, text selections, and decorative images
+  if (
+    element.closest('p, blockquote, img, [role="img"]') ||
+    (element.tagName.match(/^H[1-6]$/) && !element.closest('button, a, .cursor-target'))
+  ) {
+    return null;
+  }
 
   // 1. Admin Shield / Spider-HQ Security Trigger
-  if (
-    webTarget === 'admin-trigger' ||
-    ariaLabel.includes('Security Token') ||
-    target.classList.contains('admin-shield') ||
-    target.closest('[data-web-target="admin-trigger"]')
-  ) {
-    return { element: target, profile: 'admin' };
+  const adminTarget = element.closest<HTMLElement>(
+    '[data-web-target="admin-trigger"], [aria-label="Security Token"], .admin-shield'
+  );
+  if (adminTarget) {
+    return { element: adminTarget, profile: 'admin' };
   }
 
   // 2. Primary CTA / Resume / Explore Buttons
+  const ctaTarget = element.closest<HTMLElement>(
+    '[data-web-target="cta-button"], button, a.btn'
+  );
   if (
-    webTarget === 'cta-button' ||
-    textContent.includes('EXPLORE PROJECTS') ||
-    textContent.includes('RESUME') ||
-    target.closest('[data-web-target="cta-button"]')
+    ctaTarget ||
+    element.textContent?.toUpperCase().includes('EXPLORE PROJECTS') ||
+    element.textContent?.toUpperCase().includes('RESUME')
   ) {
-    return { element: target, profile: 'cta' };
+    return { element: ctaTarget || (element as HTMLElement), profile: 'cta' };
   }
 
   // 3. Project Cards & GitHub Links
-  if (
-    webTarget === 'project-card' ||
-    target.closest('[data-web-target="project-card"]') ||
-    href.includes('github.com')
-  ) {
-    return { element: target, profile: 'project' };
+  const projectTarget = element.closest<HTMLElement>(
+    '[data-web-target="project-card"], a[href*="github.com"]'
+  );
+  if (projectTarget) {
+    return { element: projectTarget, profile: 'project' };
   }
 
-  // 4. Coding Profile Cards
-  if (
-    webTarget === 'coding-card' ||
-    target.closest('[data-web-target="coding-card"]') ||
-    webTarget === 'contact-card' ||
-    target.closest('[data-web-target="contact-card"]')
-  ) {
-    return { element: target, profile: 'coding' };
+  // 4. Coding Profile & Achievement Cards
+  const codingTarget = element.closest<HTMLElement>(
+    '[data-web-target="coding-card"], [data-web-target="contact-card"], [data-web-target="achievement-card"]'
+  );
+  if (codingTarget) {
+    return { element: codingTarget, profile: 'coding' };
   }
 
   // 5. Navigation Items & SP4RK Header Logo
-  if (
-    webTarget === 'nav-item' ||
-    target.closest('header nav') ||
-    target.closest('header')
-  ) {
-    return { element: target, profile: 'nav' };
+  const navTarget = element.closest<HTMLElement>(
+    '[data-web-target="nav-item"], header nav a, header a'
+  );
+  if (navTarget) {
+    return { element: navTarget, profile: 'nav' };
   }
 
-  return { element: target, profile: 'default' };
+  // 6. Other clickable links, buttons, cursor-targets
+  const genericInteractive = element.closest<HTMLElement>(
+    'a, [role="button"], .cursor-target, input, [tabindex="0"]'
+  );
+  if (genericInteractive) {
+    return { element: genericInteractive, profile: 'default' };
+  }
+
+  // 7. General canvas / whitespace click (subtle ambient web spark)
+  return { element: null, profile: 'ambient' };
 }
 
 /**
@@ -252,21 +262,23 @@ export const GlobalCursor: React.FC = () => {
     };
   }, []);
 
-  // Handle pointerdown on window (reusing existing global architecture)
+  // Handle pointerdown with capture phase to guarantee interception across all elements
   const handlePointerDown = useCallback(
     (e: PointerEvent) => {
+      // Only trigger on primary click
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+
       const targetMatch = getInteractiveTarget(e.target as Element | null);
       if (!targetMatch) {
-        // Plain text, paragraph, div, background click -> intentional restraint (no burst)
+        // Plain paragraph, text block, or decorative image -> intentional restraint
         return;
       }
 
       const { element, profile } = targetMatch;
 
       // Specification 12: Admin Shield Micro-Pulse without blocking authentication
-      if (profile === 'admin') {
+      if (profile === 'admin' && element) {
         element.classList.remove('animate-shield-pulse');
-        // Trigger reflow to restart animation smoothly
         void element.offsetWidth;
         element.classList.add('animate-shield-pulse');
         const pulseTimer = window.setTimeout(() => {
@@ -285,51 +297,59 @@ export const GlobalCursor: React.FC = () => {
 
       switch (profile) {
         case 'admin':
-          size = 32;
-          duration = 420;
+          size = 38;
+          duration = 460;
           strandCount = 8;
-          primaryColor = '#dc2626';
-          accentColor = '#991b1b';
-          centerDotColor = '#dc2626';
+          primaryColor = '#ef4444';
+          accentColor = '#dc2626';
+          centerDotColor = '#ef4444';
           break;
         case 'cta':
-          size = 36;
-          duration = 400;
+          size = 44;
+          duration = 460;
           strandCount = 8;
           primaryColor = '#0f172a';
-          accentColor = '#dc2626';
-          centerDotColor = '#dc2626';
+          accentColor = '#ef4444';
+          centerDotColor = '#ef4444';
           break;
         case 'project':
         case 'coding':
-          size = 40;
-          duration = 410;
+          size = 44;
+          duration = 480;
           strandCount = 8;
           primaryColor = '#0f172a';
-          accentColor = '#dc2626';
-          centerDotColor = '#0f172a';
+          accentColor = '#ef4444';
+          centerDotColor = '#ef4444';
           break;
         case 'nav':
-          size = 24;
-          duration = 340;
+          size = 32;
+          duration = 420;
           strandCount = 6;
           primaryColor = '#334155';
-          accentColor = '#dc2626';
-          centerDotColor = '#dc2626';
+          accentColor = '#ef4444';
+          centerDotColor = '#ef4444';
+          break;
+        case 'ambient':
+          size = 32;
+          duration = 420;
+          strandCount = 6;
+          primaryColor = '#0f172a';
+          accentColor = '#ef4444';
+          centerDotColor = '#ef4444';
           break;
         default:
-          size = 30;
-          duration = 380;
+          size = 38;
+          duration = 440;
           strandCount = 7;
           primaryColor = '#0f172a';
-          accentColor = '#dc2626';
-          centerDotColor = '#dc2626';
+          accentColor = '#ef4444';
+          centerDotColor = '#ef4444';
           break;
       }
 
       // Mobile / Touch Adaptation (Specification 16)
       if (isTouchDevice) {
-        size = Math.max(22, Math.round(size * 0.8));
+        size = Math.max(26, Math.round(size * 0.85));
         strandCount = Math.min(6, strandCount);
       }
 
@@ -346,7 +366,7 @@ export const GlobalCursor: React.FC = () => {
         if (speed > 0.2) {
           dirX = lastPointerRef.current.vx / speed;
           dirY = lastPointerRef.current.vy / speed;
-          biasMag = Math.min(3.5, speed * 1.5);
+          biasMag = Math.min(4, speed * 1.6);
         }
       }
 
@@ -402,13 +422,17 @@ export const GlobalCursor: React.FC = () => {
     window.addEventListener('pointermove', handlePointerMove, {
       passive: true,
     });
+    // Use capture phase so stopPropagation in child elements never blocks click spark
     window.addEventListener('pointerdown', handlePointerDown, {
       passive: true,
+      capture: true,
     });
 
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerdown', handlePointerDown, {
+        capture: true,
+      });
       // Clean up timers
       activeTimersRef.current.forEach((t) => clearTimeout(t));
       activeTimersRef.current = [];
@@ -427,63 +451,80 @@ export const GlobalCursor: React.FC = () => {
           key={burst.id}
           className="web-click-burst fixed pointer-events-none select-none"
           style={{
-            left: burst.x,
-            top: burst.y,
-            width: burst.size,
-            height: burst.size,
+            left: `${burst.x}px`,
+            top: `${burst.y}px`,
+            width: `${burst.size}px`,
+            height: `${burst.size}px`,
             transform: 'translate(-50%, -50%)',
-            animation: `webBurstFilament ${burst.duration}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-            transformOrigin: 'center center',
           }}
         >
-          <svg
-            viewBox={`${-burst.size / 2} ${-burst.size / 2} ${burst.size} ${burst.size}`}
-            width={burst.size}
-            height={burst.size}
-            className="overflow-visible"
+          <div
+            className="relative w-full h-full"
             style={{
-              filter: 'drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.15))',
+              animation: `webBurstExpand ${burst.duration}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+              transformOrigin: 'center center',
             }}
           >
-            {/* Radial Spider-Web Strands */}
-            {burst.strands.map((s, idx) => (
-              <line
-                key={`strand-${idx}`}
-                x1="0"
-                y1="0"
-                x2={s.x2}
-                y2={s.y2}
-                stroke={s.stroke}
-                strokeWidth={s.strokeWidth}
-                strokeLinecap="round"
-                opacity={s.opacity}
-              />
-            ))}
-
-            {/* Inward-Curving Web Cross Filaments */}
-            {burst.arcs.map((a, idx) => (
-              <path
-                key={`arc-${idx}`}
-                d={a.d}
-                fill="none"
-                stroke={a.stroke}
-                strokeWidth={a.strokeWidth}
-                strokeLinecap="round"
-                opacity={a.opacity}
-              />
-            ))}
-
-            {/* Central Web Node Contact Dot */}
-            <circle
-              cx="0"
-              cy="0"
-              r="1.4"
-              fill={burst.centerDotColor}
+            <svg
+              viewBox={`${-burst.size / 2} ${-burst.size / 2} ${burst.size} ${burst.size}`}
+              width={burst.size}
+              height={burst.size}
+              className="overflow-visible"
               style={{
-                animation: `webCenterNode ${burst.duration}ms ease-out forwards`,
+                filter: 'drop-shadow(0 0 3px rgba(239, 68, 68, 0.7)) drop-shadow(0 1px 2px rgba(15, 23, 42, 0.5))',
               }}
-            />
-          </svg>
+            >
+              {/* Radial Spider-Web Strands */}
+              {burst.strands.map((s, idx) => (
+                <line
+                  key={`strand-${idx}`}
+                  x1="0"
+                  y1="0"
+                  x2={s.x2}
+                  y2={s.y2}
+                  stroke={s.stroke}
+                  strokeWidth={s.strokeWidth}
+                  strokeLinecap="round"
+                  opacity={s.opacity}
+                />
+              ))}
+
+              {/* Inward-Curving Web Cross Filaments */}
+              {burst.arcs.map((a, idx) => (
+                <path
+                  key={`arc-${idx}`}
+                  d={a.d}
+                  fill="none"
+                  stroke={a.stroke}
+                  strokeWidth={a.strokeWidth}
+                  strokeLinecap="round"
+                  opacity={a.opacity}
+                />
+              ))}
+
+              {/* Central Web Node Contact Dot (Outer Crimson Halo) */}
+              <circle
+                cx="0"
+                cy="0"
+                r="2.4"
+                fill={burst.centerDotColor}
+                style={{
+                  animation: `webCenterNode ${burst.duration}ms ease-out forwards`,
+                }}
+              />
+
+              {/* Central Web Node Contact Dot (Inner White Spark Core) */}
+              <circle
+                cx="0"
+                cy="0"
+                r="1.2"
+                fill="#ffffff"
+                style={{
+                  animation: `webCenterNode ${burst.duration}ms ease-out forwards`,
+                }}
+              />
+            </svg>
+          </div>
         </div>
       ))}
     </div>

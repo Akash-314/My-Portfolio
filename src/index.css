@@ -141,43 +141,43 @@
 }
 
 /* Spider-Man Web Click Burst Animations */
-@keyframes webBurstFilament {
+@keyframes webBurstExpand {
   0% {
-    transform: scale(0.12) translate3d(0, 0, 0);
+    transform: scale(0.12);
     opacity: 0.95;
   }
-  32% {
-    transform: scale(1) translate3d(0, 0, 0);
+  30% {
+    transform: scale(1);
     opacity: 1;
   }
-  68% {
-    transform: scale(1.04) translate3d(0, 0, 0);
-    opacity: 0.7;
+  70% {
+    transform: scale(1.06);
+    opacity: 0.85;
   }
   100% {
-    transform: scale(0.92) translate3d(0, 0, 0);
+    transform: scale(0.95);
     opacity: 0;
   }
 }
 
 @keyframes webCenterNode {
   0% {
-    transform: scale(1.4);
+    transform: scale(1.6);
     opacity: 1;
   }
-  40% {
+  35% {
     transform: scale(1);
-    opacity: 0.9;
+    opacity: 0.95;
   }
   100% {
-    transform: scale(0.3);
+    transform: scale(0.2);
     opacity: 0;
   }
 }
 
 @keyframes webBurstReduced {
   0% {
-    opacity: 0.9;
+    opacity: 0.95;
   }
   100% {
     opacity: 0;
