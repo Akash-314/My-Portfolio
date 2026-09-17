@@ -4,6 +4,7 @@ import { portfolioData } from '../data/portfolio';
 import { usePortfolio } from '../context/PortfolioContext';
 import { GithubIcon, LinkedinIcon } from './Icons';
 import { HangingSpiderMan, CornerWebBottomRight } from './SpiderManSuspensions';
+import { WebMagneticButton } from './WebMagneticButton';
 
 export const Contact: React.FC = () => {
   const { contact } = portfolioData.personal;
@@ -215,23 +216,25 @@ export const Contact: React.FC = () => {
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={status === 'submitting'}
-                    data-web-target="cta-button"
-                    className="cursor-target w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
-                  >
-                    {status === 'submitting' ? (
-                      <span className="flex items-center gap-2 font-mono">
-                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        TRANSMITTING...
-                      </span>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" /> SEND MESSAGE
-                      </>
-                    )}
-                  </button>
+                  <WebMagneticButton className="w-full">
+                    <button
+                      type="submit"
+                      disabled={status === 'submitting'}
+                      data-web-target="cta-button"
+                      className="cursor-target w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
+                    >
+                      {status === 'submitting' ? (
+                        <span className="flex items-center gap-2 font-mono">
+                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          TRANSMITTING...
+                        </span>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" /> SEND MESSAGE
+                        </>
+                      )}
+                    </button>
+                  </WebMagneticButton>
                 </form>
               )}
             </div>

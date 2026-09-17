@@ -5,6 +5,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { GithubIcon } from './Icons';
 import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 import { getLiveCodingStats, type LiveStatsResult } from '../services/codingStatsService';
+import { WebMagneticButton } from './WebMagneticButton';
 
 const CountUpNumber: React.FC<{ target: number; duration?: number }> = ({ target, duration = 1.2 }) => {
   const [count, setCount] = useState(0);
@@ -327,14 +328,16 @@ export const CodingStats: React.FC = () => {
               </a>
             )}
 
-            <a
-              href={displayStats.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-black flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <GithubIcon className="w-4 h-4" /> GITHUB REPO
-            </a>
+            <WebMagneticButton>
+              <a
+                href={displayStats.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-target px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-black flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <GithubIcon className="w-4 h-4" /> GITHUB REPO
+              </a>
+            </WebMagneticButton>
 
             <a
               href={displayStats.leetcodeUrl}

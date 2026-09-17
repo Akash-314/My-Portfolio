@@ -6,6 +6,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { CornerWebTopLeft, CornerWebBottomRight } from './SpiderManSuspensions';
 import { SpiderMaskReveal } from './SpiderMaskReveal';
 import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
+import { WebMagneticButton } from './WebMagneticButton';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -82,28 +83,32 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             className="flex flex-wrap items-center gap-4 w-full sm:w-auto"
           >
             {/* Solid Red Primary Capsule Button */}
-            <button
-              onClick={onExploreClick}
-              data-web-target="cta-button"
-              className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
-            >
-              <Compass className="w-4 h-4" />
-              EXPLORE PROJECTS
-            </button>
+            <WebMagneticButton>
+              <button
+                onClick={onExploreClick}
+                data-web-target="cta-button"
+                className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
+              >
+                <Compass className="w-4 h-4" />
+                EXPLORE PROJECTS
+              </button>
+            </WebMagneticButton>
 
             {/* Solid Dark Secondary Capsule Button */}
-            <a
-              href={effectiveResumePath}
-              target={isExternalUrl ? '_blank' : undefined}
-              rel={isExternalUrl ? 'noopener noreferrer' : undefined}
-              download={isExternalUrl ? undefined : (resumeSettings?.fileName || 'Akash_Kumar_Resume.pdf')}
-              onClick={handleResumeClick}
-              data-web-target="cta-button"
-              className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
-            >
-              <Download className="w-4 h-4 text-red-500" />
-              SDE_RESUME.PDF
-            </a>
+            <WebMagneticButton>
+              <a
+                href={effectiveResumePath}
+                target={isExternalUrl ? '_blank' : undefined}
+                rel={isExternalUrl ? 'noopener noreferrer' : undefined}
+                download={isExternalUrl ? undefined : (resumeSettings?.fileName || 'Akash_Kumar_Resume.pdf')}
+                onClick={handleResumeClick}
+                data-web-target="cta-button"
+                className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
+              >
+                <Download className="w-4 h-4 text-red-500" />
+                SDE_RESUME.PDF
+              </a>
+            </WebMagneticButton>
           </motion.div>
         </div>
       </div>
