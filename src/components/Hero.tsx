@@ -85,7 +85,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             <button
               onClick={onExploreClick}
               data-web-target="cta-button"
-              className="px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
+              className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
             >
               <Compass className="w-4 h-4" />
               EXPLORE PROJECTS
@@ -99,7 +99,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
               download={isExternalUrl ? undefined : (resumeSettings?.fileName || 'Akash_Kumar_Resume.pdf')}
               onClick={handleResumeClick}
               data-web-target="cta-button"
-              className="px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
+              className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
             >
               <Download className="w-4 h-4 text-red-500" />
               SDE_RESUME.PDF

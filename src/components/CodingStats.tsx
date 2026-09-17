@@ -154,7 +154,7 @@ export const CodingStats: React.FC = () => {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-[#b91c1c] hover:shadow-md transition-all cursor-pointer"
+              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-[#b91c1c] hover:shadow-md transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between w-full mb-1">
                 <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
@@ -180,7 +180,7 @@ export const CodingStats: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-amber-500 hover:shadow-md transition-all cursor-pointer"
+              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-amber-500 hover:shadow-md transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between w-full mb-1">
                 <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
@@ -207,7 +207,7 @@ export const CodingStats: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-blue-600 hover:shadow-md transition-all cursor-pointer"
+              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-blue-600 hover:shadow-md transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between w-full mb-1">
                 <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
@@ -233,7 +233,7 @@ export const CodingStats: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-emerald-600 hover:shadow-md transition-all cursor-pointer"
+              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-emerald-600 hover:shadow-md transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between w-full mb-1">
                 <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">

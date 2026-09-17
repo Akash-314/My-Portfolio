@@ -219,7 +219,7 @@ export const Contact: React.FC = () => {
                     type="submit"
                     disabled={status === 'submitting'}
                     data-web-target="cta-button"
-                    className="w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
+                    className="cursor-target w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
                   >
                     {status === 'submitting' ? (
                       <span className="flex items-center gap-2 font-mono">

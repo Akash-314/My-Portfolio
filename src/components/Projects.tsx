@@ -63,7 +63,7 @@ const ProjectCard: React.FC<{ project: Project; idx: number }> = ({ project, idx
           ? 'transform 0.1s ease-out'
           : 'transform 0.4s ease-out, box-shadow 0.3s ease'
       }}
-      className={`spydyy-card p-6 flex flex-col justify-between group relative overflow-hidden transition-shadow ${
+      className={`cursor-target spydyy-card p-6 flex flex-col justify-between group relative overflow-hidden transition-shadow ${
         isHovered ? 'shadow-xl shadow-red-950/5 border-red-200/80' : ''
       }`}
     >

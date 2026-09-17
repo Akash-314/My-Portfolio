@@ -14,6 +14,7 @@ import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { GlobalCursor } from './components/GlobalCursor';
+import { TargetCursor } from './components/TargetCursor';
 import { GlobalWebNetwork } from './components/effects/GlobalWebNetwork';
 import { ScrollProgressSpider } from './components/effects/ScrollProgressSpider';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -135,7 +136,18 @@ function PortfolioMain() {
 
   return (
     <div className="relative min-h-screen bg-[#fcfcfc] text-[#111827] font-sans overflow-x-hidden">
-      {/* Global Interactive Cursor Reticle across entire document */}
+      {/* Global Target Cursor (React Bits GSAP targeting core) */}
+      <TargetCursor
+        targetSelector=".cursor-target"
+        spinDuration={3}
+        hoverDuration={0.2}
+        parallaxOn={true}
+        hideDefaultCursor={true}
+        cursorColor="#0f172a"
+        cursorColorOnTarget="#dc2626"
+      />
+
+      {/* Tactile Spider-Web Click Shockwaves */}
       <GlobalCursor />
 
       {/* Feature 2 & 3: Cursor-reactive Full-Page Web Network and Connection Strands */}

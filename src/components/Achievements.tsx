@@ -155,7 +155,7 @@ export const Achievements: React.FC = () => {
                 boxShadow: unlockPhase === 3 ? '0 0 28px rgba(220, 38, 38, 0.25)' : undefined,
                 transition: 'box-shadow 0.4s ease'
               }}
-              className="spydyy-card p-8 sm:p-12 border-2 border-red-500/60 relative overflow-hidden bg-gradient-to-br from-white via-white to-red-50/30"
+              className="cursor-target spydyy-card p-8 sm:p-12 border-2 border-red-500/60 relative overflow-hidden bg-gradient-to-br from-white via-white to-red-50/30"
             >
               {/* Feature 8: Step 2 Thin Web Line Perimeter Draw */}
               {selectedAchievement.featured && (

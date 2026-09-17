@@ -46,7 +46,7 @@ export const AdminShieldTrigger: React.FC<AdminShieldTriggerProps> = ({
       tabIndex={0}
       title={title}
       aria-label="Security Token"
-      className={`group relative inline-flex items-center justify-center p-1 rounded-full text-gray-500/40 hover:text-red-500 transition-all duration-300 transform hover:scale-110 active:scale-95 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.6)] focus:outline-none cursor-pointer ${className}`}
+      className={`cursor-target group relative inline-flex items-center justify-center p-1 rounded-full text-gray-500/40 hover:text-red-500 transition-all duration-300 transform hover:scale-110 active:scale-95 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.6)] focus:outline-none cursor-pointer ${className}`}
     >
       <Shield
         style={{ width: iconSize, height: iconSize }}
