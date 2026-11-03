@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { portfolioData as initialPortfolioData } from '../data/portfolio';
+import { uploadResumeToNeonStorage, saveMessageToNeon, fetchMessagesFromNeon } from '../services/neonService';
 import type {
   Project,
   Achievement,
@@ -359,6 +360,24 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
       return { success: false, message: 'Please select a valid PDF file (.pdf).' };
     }
+    // Try uploading to Neon Object Storage first
+    try {
+      const neonRes = await uploadResumeToNeonStorage(file);
+      if (neonRes.success && neonRes.url) {
+        setUploadedResumeData(neonRes.url);
+        setResumeSettings({
+          sourceType: 'upload',
+          url: neonRes.url,
+          fileName: neonRes.fileName || file.name,
+          fileSize: neonRes.fileSize || 'PDF',
+          updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        });
+        return { success: true, message: `Uploaded to Neon Object Storage: ${file.name}!` };
+      }
+    } catch (err) {
+      console.warn('Neon storage upload fallback to local storage:', err);
+    }
+
     if (file.size > 3.5 * 1024 * 1024) {
       return { success: false, message: 'File is larger than 3.5MB. Please upload a compressed PDF or use a Google Drive link.' };
     }
@@ -406,6 +425,19 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
   });
+
+  // Sync initial messages from Neon Postgres if available
+  useEffect(() => {
+    fetchMessagesFromNeon().then((remoteMsgs) => {
+      if (remoteMsgs && remoteMsgs.length > 0) {
+        setMessages((prev) => {
+          const map = new Map();
+          [...prev, ...remoteMsgs].forEach((m) => map.set(m.id, m));
+          return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
+        });
+      }
+    }).catch(() => {});
+  }, []);
 
   // Persist State Changes
   useEffect(() => {
@@ -614,6 +646,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       read: false
     };
     setMessages((prev) => [newMsg, ...prev]);
+
+    // Asynchronously replicate message to Neon Postgres
+    saveMessageToNeon(newMsg).catch((err) => {
+      console.warn('Could not replicate message to Neon Postgres:', err);
+    });
   };
 
   const markMessageRead = (id: string, read = true) => {

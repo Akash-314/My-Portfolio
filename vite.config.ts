@@ -13,6 +13,18 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/api/neon': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/api/contact': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/api/storage': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
       '/api/codechef-proxy': {
         target: 'https://www.codechef.com',
         changeOrigin: true,
