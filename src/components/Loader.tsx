@@ -72,7 +72,7 @@ export const Loader: React.FC<LoaderProps> = ({ onFinish }) => {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="text-xl font-bold uppercase tracking-[0.2em] text-white"
+                className="text-2xl sm:text-3xl font-normal font-display uppercase tracking-[0.2em] text-white"
               >
                 AKASH KUMAR
               </motion.div>

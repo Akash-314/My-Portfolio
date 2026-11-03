@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+@theme {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-bebas: 'Bebas Neue', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 @layer base {
   :root {
     color-scheme: light;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     --spydyy-red: #b91c1c;
     --spydyy-dark: #111827;
     --spydyy-bg: #fcfcfc;
@@ -13,7 +22,7 @@
     overflow-x: hidden;
     background-color: #fcfcfc;
     color: #111827;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body);
   }
 
   body {
@@ -24,6 +33,7 @@
     overflow-x: hidden;
     background-color: #fcfcfc;
     color: #111827;
+    font-family: var(--font-body);
   }
 
   /* Minimalist clean scrollbar */
@@ -41,13 +51,19 @@
   }
 }
 
-/* Comic 3D Text Shadow Effect */
-.text-3d-red {
-  text-shadow: 2.5px 2.5px 0px #b91c1c, 4.5px 4.5px 0px #111827;
+/* Typography Utility Classes */
+.font-display {
+  font-family: var(--font-display);
 }
 
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Neutralized text-shadow fallbacks */
+.text-3d-red,
 .text-3d-dark {
-  text-shadow: 2.5px 2.5px 0px #111827, 4.5px 4.5px 0px #b91c1c;
+  text-shadow: none;
 }
 
 /* Spydyy White Card Token */

@@ -7,6 +7,7 @@ import { CornerWebTopLeft, CornerWebBottomRight } from './SpiderManSuspensions';
 import { SpiderMaskReveal } from './SpiderMaskReveal';
 import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 import { WebMagneticButton } from './WebMagneticButton';
+import { ElasticLettering } from './ElasticLettering';
 import { SPIDER_EFFECTS_CONFIG } from '../config/spiderEffectsConfig';
 import { globalScrollPhysics, type ScrollPhysicsState } from '../utils/scrollPhysics';
 
@@ -125,22 +126,41 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-xs sm:text-sm font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-3 flex items-center gap-2"
+            className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-3 flex items-center gap-2"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-[#b91c1c] animate-pulse" />
             <span>YOUR FRIENDLY NEIGHBORHOOD ENGINEER</span>
             <AdminShieldTrigger className="opacity-25 hover:opacity-100 text-[#b91c1c] ml-0.5" iconSize={12} />
           </motion.div>
 
-          {/* Heading with Comic 3D Text Shadow */}
-          <motion.h1
+          {/* Strong Superhero Display Heading with Elastic Lettering */}
+          <motion.div
             initial={{ opacity: 0, x: -25 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl sm:text-7xl lg:text-8xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-8 leading-[0.95]"
+            className="mb-8"
           >
-            AKASH<br />KUMAR<span className="text-[#b91c1c]">.</span>
-          </motion.h1>
+            <ElasticLettering
+              as="h1"
+              text={"AKASH\nKUMAR."}
+              align="left"
+              tensionColor="#b91c1c"
+              dotColor="#b91c1c"
+              tensionTint={0.85}
+              tension={0.65}
+              stiffness={1.1}
+              bounce={0.65}
+              reach={3.8}
+              squash={0.45}
+              tilt={0.5}
+              lift={0.4}
+              throwable={true}
+              pluckOnClick={true}
+              pluckStrength={1.2}
+              hint={true}
+              className="text-6xl sm:text-8xl lg:text-9xl font-normal uppercase tracking-tight text-[#111827] font-display leading-[0.88]"
+            />
+          </motion.div>
 
           {/* Action Capsule Buttons */}
           <motion.div
@@ -154,7 +174,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
               <button
                 onClick={onExploreClick}
                 data-web-target="cta-button"
-                className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
+                className="cursor-target px-8 py-3.5 rounded-full text-base sm:text-lg font-normal font-display uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
               >
                 <Compass className="w-4 h-4" />
                 EXPLORE PROJECTS
@@ -170,7 +190,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                 download={isExternalUrl ? undefined : (resumeSettings?.fileName || 'Akash_Kumar_Resume.pdf')}
                 onClick={handleResumeClick}
                 data-web-target="cta-button"
-                className="cursor-target px-8 py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2.5"
+                className="cursor-target px-8 py-3.5 rounded-full text-base sm:text-lg font-normal font-display uppercase tracking-wider text-white bg-[#111827] hover:bg-[#1f2937] shadow-lg shadow-gray-900/20 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4 text-red-500" />
                 SDE_RESUME.PDF

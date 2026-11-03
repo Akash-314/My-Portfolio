@@ -19,11 +19,18 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
     <footer className="relative z-10 bg-[#0f0f12] text-white border-t border-gray-800 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
         {/* Logo */}
-        <h3 className="font-black italic text-3xl tracking-tighter text-white font-sans uppercase mb-2">
-          AKASH<span className="text-[#b91c1c]">.</span>
-        </h3>
+        <div className="flex items-center gap-2 mb-2">
+          <img
+            src="/assets/favicon.ico"
+            alt="Spider Logo"
+            className="w-8 h-8 object-contain rounded-full drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]"
+          />
+          <h3 className="font-normal font-display text-4xl tracking-tight text-white uppercase">
+            AKASH<span className="text-[#b91c1c]">.</span>
+          </h3>
+        </div>
 
-        <p className="text-[11px] font-mono tracking-[0.25em] uppercase text-[#b91c1c] font-bold mb-6">
+        <p className="font-display text-sm tracking-[0.25em] uppercase text-[#b91c1c] font-normal mb-6">
           BUILD. SOLVE. LEARN. REPEAT.
         </p>
 

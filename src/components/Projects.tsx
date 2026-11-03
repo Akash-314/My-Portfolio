@@ -120,7 +120,7 @@ const ProjectCard: React.FC<{ project: Project; idx: number }> = ({ project, idx
         )}
 
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-extrabold text-[#111827] font-sans group-hover:text-[#b91c1c] transition-colors">
+          <h3 className="text-2xl sm:text-3xl font-normal uppercase tracking-wide text-[#111827] font-display group-hover:text-[#b91c1c] transition-colors leading-tight">
             {project.title}
           </h3>
           {project.githubUrl && (
@@ -164,7 +164,7 @@ const ProjectCard: React.FC<{ project: Project; idx: number }> = ({ project, idx
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${project.title} GitHub Repository`}
-              className="text-xs font-extrabold text-[#111827] hover:text-[#b91c1c] flex items-center gap-1.5 transition-colors"
+              className="text-sm font-normal font-display tracking-wider uppercase text-[#111827] hover:text-[#b91c1c] flex items-center gap-1.5 transition-colors"
             >
               <GithubIcon className="w-4 h-4" /> CODE REPO
             </a>
@@ -178,7 +178,7 @@ const ProjectCard: React.FC<{ project: Project; idx: number }> = ({ project, idx
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${project.title} Live Demo`}
-              className="text-xs font-extrabold text-[#b91c1c] hover:text-[#991b1b] flex items-center gap-1 transition-colors"
+              className="text-sm font-normal font-display tracking-wider uppercase text-[#b91c1c] hover:text-[#991b1b] flex items-center gap-1 transition-colors"
             >
               <Globe className="w-3.5 h-3.5" /> LIVE DEMO
             </a>
@@ -202,11 +202,11 @@ export const Projects: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2 flex items-center justify-center gap-1.5">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center justify-center gap-1.5">
             <span>PROVEN ENGINEERING WORK</span>
             <AdminShieldTrigger className="opacity-20 hover:opacity-100 text-[#b91c1c]" iconSize={12} />
           </div>
-          <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-3">
+          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
             PROJECTS<span className="text-[#b91c1c]">.</span>
           </h2>
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full" />

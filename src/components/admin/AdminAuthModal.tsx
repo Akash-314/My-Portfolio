@@ -83,7 +83,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
 
         {/* Title & Description */}
         <div className="mb-6 relative z-10">
-          <h3 className="text-2xl font-black italic tracking-tight text-white font-sans uppercase">
+          <h3 className="text-3xl font-normal font-display tracking-tight text-white uppercase">
             RESTRICTED ACCESS<span className="text-red-500">.</span>
           </h3>
           <p className="text-xs text-gray-400 font-sans mt-1.5 leading-relaxed font-medium">
@@ -155,7 +155,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-2xl text-xs font-black uppercase tracking-wider text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-900/40 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+            className="w-full py-3.5 rounded-2xl text-base font-normal font-display uppercase tracking-wider text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-900/40 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
           >
             {loading ? (
               <span className="flex items-center gap-2 font-mono">

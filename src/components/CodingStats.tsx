@@ -79,10 +79,10 @@ export const CodingStats: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5">
             <Flame className="w-4 h-4 text-[#b91c1c]" /> COMPETITIVE PROGRAMMING METRICS
           </div>
-          <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-3">
+          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
             THE GRIND<span className="text-[#b91c1c]">.</span>
           </h2>
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full" />
@@ -163,7 +163,7 @@ export const CodingStats: React.FC = () => {
                 </span>
                 <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-[#b91c1c] transition-colors" />
               </div>
-              <div className="text-4xl font-extrabold text-[#b91c1c] font-mono my-1">
+              <div className="text-5xl sm:text-6xl font-normal font-display text-[#b91c1c] my-0.5 tracking-tight leading-none">
                 <CountUpNumber target={displayStats.totalSolved} />
               </div>
               <span className="text-[10px] font-mono text-gray-500 font-bold flex items-center gap-1 group-hover:text-[#b91c1c] transition-colors">
@@ -189,12 +189,12 @@ export const CodingStats: React.FC = () => {
                 </span>
                 <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-amber-600 transition-colors" />
               </div>
-              <div className="text-4xl font-extrabold text-amber-500 font-mono flex items-center justify-center gap-1 my-1">
-                <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
+              <div className="text-5xl sm:text-6xl font-normal font-display text-amber-500 flex items-center justify-center gap-1.5 my-0.5 tracking-tight leading-none">
+                <Star className="w-7 h-7 text-amber-500 fill-amber-500" />
                 <CountUpNumber target={displayStats.rating} />
               </div>
               <span className="text-[10px] font-mono text-amber-600 font-bold group-hover:underline transition-colors">
-                TOP 7% GLOBAL CONTEST →
+                {displayStats.rating >= 1800 ? 'TOP 8% GLOBAL CONTEST →' : 'TOP 7% GLOBAL CONTEST →'}
               </span>
             </motion.a>
 
@@ -216,7 +216,7 @@ export const CodingStats: React.FC = () => {
                 </span>
                 <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-blue-600 transition-colors" />
               </div>
-              <div className="text-4xl font-extrabold text-blue-600 font-mono my-1">
+              <div className="text-5xl sm:text-6xl font-normal font-display text-blue-600 my-0.5 tracking-tight leading-none">
                 <CountUpNumber target={displayStats.codeforcesRating} />
               </div>
               <span className="text-[10px] font-mono text-blue-600 font-bold group-hover:underline transition-colors">
@@ -242,7 +242,7 @@ export const CodingStats: React.FC = () => {
                 </span>
                 <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-emerald-600 transition-colors" />
               </div>
-              <div className="text-4xl font-extrabold text-emerald-600 font-mono my-1">
+              <div className="text-5xl sm:text-6xl font-normal font-display text-emerald-600 my-0.5 tracking-tight leading-none">
                 <CountUpNumber target={displayStats.codechefRating} />
               </div>
               <span className="text-[10px] font-mono text-emerald-600 font-bold uppercase flex items-center gap-1 group-hover:underline transition-colors">
@@ -284,7 +284,7 @@ export const CodingStats: React.FC = () => {
               <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
                 <div>
                   <span className="text-xs font-mono text-emerald-700 font-bold uppercase block">EASY</span>
-                  <span className="text-xl font-bold font-mono text-emerald-900">
+                  <span className="text-3xl font-normal font-display text-emerald-900 leading-none">
                     <CountUpNumber target={displayStats.easy} />
                   </span>
                 </div>
@@ -294,7 +294,7 @@ export const CodingStats: React.FC = () => {
               <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
                 <div>
                   <span className="text-xs font-mono text-amber-700 font-bold uppercase block">MEDIUM</span>
-                  <span className="text-xl font-bold font-mono text-amber-900">
+                  <span className="text-3xl font-normal font-display text-amber-900 leading-none">
                     <CountUpNumber target={displayStats.medium} />
                   </span>
                 </div>
@@ -304,7 +304,7 @@ export const CodingStats: React.FC = () => {
               <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-center justify-between">
                 <div>
                   <span className="text-xs font-mono text-red-700 font-bold uppercase block">HARD</span>
-                  <span className="text-xl font-bold font-mono text-red-900">
+                  <span className="text-3xl font-normal font-display text-red-900 leading-none">
                     <CountUpNumber target={displayStats.hard} />
                   </span>
                 </div>
@@ -321,7 +321,7 @@ export const CodingStats: React.FC = () => {
                 href={displayStats.codolioUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-gradient-to-r from-red-600 via-rose-700 to-red-800 hover:brightness-110 flex items-center gap-2 transition-all shadow-md transform hover:scale-[1.02]"
+                className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-white bg-gradient-to-r from-red-600 via-rose-700 to-red-800 hover:brightness-110 flex items-center gap-2 transition-all shadow-md transform hover:scale-[1.02]"
               >
                 <span>VIEW COMPLETE CODING PROFILE (CODOLIO)</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -333,7 +333,7 @@ export const CodingStats: React.FC = () => {
                 href={displayStats.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="cursor-target px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#111827] hover:bg-black flex items-center gap-2 transition-colors shadow-sm"
+                className="cursor-target px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-white bg-[#111827] hover:bg-black flex items-center gap-2 transition-colors shadow-sm"
               >
                 <GithubIcon className="w-4 h-4" /> GITHUB REPO
               </a>
@@ -343,7 +343,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.leetcodeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-[#b91c1c] flex items-center gap-2 transition-colors shadow-sm"
+              className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-[#b91c1c] flex items-center gap-2 transition-colors shadow-sm"
             >
               <Code2 className="w-4 h-4 text-amber-600" /> LEETCODE <ExternalLink className="w-3 h-3" />
             </a>
@@ -352,7 +352,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.codeforcesUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-blue-600 flex items-center gap-2 transition-colors shadow-sm"
+              className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-blue-600 flex items-center gap-2 transition-colors shadow-sm"
             >
               <Terminal className="w-4 h-4 text-blue-600" /> CODEFORCES <ExternalLink className="w-3 h-3" />
             </a>
@@ -361,7 +361,7 @@ export const CodingStats: React.FC = () => {
               href={displayStats.codechefUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-emerald-600 flex items-center gap-2 transition-colors shadow-sm"
+              className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-emerald-600 flex items-center gap-2 transition-colors shadow-sm"
             >
               <Award className="w-4 h-4 text-emerald-600" /> CODECHEF <ExternalLink className="w-3 h-3" />
             </a>

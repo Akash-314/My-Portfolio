@@ -37,14 +37,14 @@ export const Achievements: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-[#b91c1c]" /> CONNECTED HACKATHON & CODING PODIUMS
           </div>
-          <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-3">
+          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
             ACHIEVEMENTS<span className="text-[#b91c1c]">.</span>
           </h2>
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full mb-3" />
-          <p className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500 max-w-lg">
+          <p className="text-xs font-sans font-bold uppercase tracking-[0.15em] text-gray-500 max-w-lg">
             INTERCONNECTED WEB OF VICTORIES & COMPETITIVE BENCHMARKS
           </p>
         </div>
@@ -118,11 +118,11 @@ export const Achievements: React.FC = () => {
                       )}
                     </div>
 
-                    <h4 className="text-sm font-extrabold text-[#111827] font-sans line-clamp-1 mb-1">
+                    <h4 className="text-base font-normal uppercase tracking-wide text-[#111827] font-display line-clamp-1 mb-1">
                       {ach.title}
                     </h4>
 
-                    <div className="text-[11px] font-mono text-[#b91c1c] font-bold mb-2">
+                    <div className="text-xs font-display tracking-wider text-[#b91c1c] uppercase mb-2">
                       {ach.position} • {ach.year}
                     </div>
 
@@ -217,10 +217,10 @@ export const Achievements: React.FC = () => {
                     ) : (
                       <Award className="w-16 h-16 text-red-600 drop-shadow-md group-hover:scale-110 transition-transform" />
                     )}
-                    <span className="text-xs font-mono font-black text-[#111827] mt-3 uppercase tracking-wider text-center">
+                    <span className="text-base font-display font-normal text-[#111827] mt-3 uppercase tracking-wider text-center">
                       {selectedAchievement.position}
                     </span>
-                    <span className="text-[11px] font-mono text-gray-600 font-bold mt-1 text-center">
+                    <span className="text-xs font-display text-gray-600 mt-1 uppercase tracking-wider text-center">
                       {selectedAchievement.organizer} • {selectedAchievement.year}
                     </span>
                   </div>
@@ -229,21 +229,21 @@ export const Achievements: React.FC = () => {
                 {/* Right Detailed Narrative */}
                 <div className="lg:col-span-8 flex flex-col justify-center">
                   <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                    <span className="px-3 py-1 rounded-md bg-[#b91c1c] text-white font-mono text-xs font-black uppercase tracking-wider">
+                    <span className="px-3.5 py-1 rounded-md bg-[#b91c1c] text-white font-display text-sm tracking-wider uppercase">
                       {selectedAchievement.position}
                     </span>
-                    <span className="text-xs font-mono text-gray-600 font-bold flex items-center gap-1">
+                    <span className="text-xs font-display tracking-wider text-gray-600 uppercase flex items-center gap-1">
                       EVENT: {selectedAchievement.event}
                     </span>
                   </div>
 
-                  <h3 className="text-2xl sm:text-4xl font-extrabold text-[#111827] font-sans tracking-tight mb-2">
+                  <h3 className="text-3xl sm:text-5xl font-normal uppercase tracking-tight text-[#111827] font-display mb-2 leading-none">
                     {selectedAchievement.title}
                   </h3>
 
-                  <p className="text-sm font-bold text-[#b91c1c] font-mono mb-4">
+                  <div className="text-sm sm:text-base font-display tracking-widest text-[#b91c1c] uppercase mb-4">
                     ORGANIZER: {selectedAchievement.organizer} — {selectedAchievement.year}
-                  </p>
+                  </div>
 
                   <p className="text-gray-700 text-base sm:text-lg leading-relaxed font-sans font-medium mb-6">
                     {selectedAchievement.description}

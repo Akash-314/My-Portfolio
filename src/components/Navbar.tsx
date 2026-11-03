@@ -55,11 +55,16 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
         <a
           href="#hero"
           onClick={(e) => handleNavClick(e, '#hero')}
-          className="flex items-center gap-1 group focus:outline-none"
+          className="flex items-center gap-2 group focus:outline-none"
           aria-label="Akash Kumar Portfolio Home"
         >
+          <img
+            src="/assets/favicon.ico"
+            alt="SP4RK Logo"
+            className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]"
+          />
           <span
-            className={`font-extrabold italic text-2xl sm:text-3xl tracking-tighter font-sans transition-colors ${
+            className={`font-display text-3xl sm:text-4xl tracking-tight transition-colors ${
               scrolled ? 'text-white' : 'text-[#111827]'
             }`}
           >
@@ -86,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
                 data-web-target="nav-item"
-                className={`relative py-1 text-xs font-black tracking-widest transition-colors font-sans uppercase ${
+                className={`relative py-1 text-base tracking-[0.12em] transition-colors font-display uppercase font-normal ${
                   isActive
                     ? 'text-[#b91c1c]'
                     : scrolled
@@ -152,7 +157,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                     key={link.name}
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
-                    className={`py-2 text-sm font-black tracking-widest ${
+                    className={`py-2 text-lg font-display tracking-[0.12em] uppercase font-normal ${
                       isActive ? 'text-[#b91c1c]' : 'text-gray-300'
                     }`}
                   >

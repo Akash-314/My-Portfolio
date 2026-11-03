@@ -180,7 +180,14 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const saved = localStorage.getItem(`${STORAGE_DATA_KEY}_projects`);
       if (saved) {
         const parsed: Project[] = JSON.parse(saved);
-        if (parsed.some((p) => p.id === 'dsa-algorithmic-suite' || p.id === 'web-dev-application')) {
+        if (
+          parsed.some(
+            (p) =>
+              p.id === 'dsa-algorithmic-suite' ||
+              p.id === 'web-dev-application' ||
+              (p.id === 'leetcode-cp-suite' && (p.subtitle?.includes('541') || !p.subtitle?.includes('548')))
+          )
+        ) {
           return initialPortfolioData.projects;
         }
         return parsed;
@@ -196,7 +203,15 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const saved = localStorage.getItem(`${STORAGE_DATA_KEY}_achievements`);
       if (saved) {
         const parsed: Achievement[] = JSON.parse(saved);
-        if (parsed.some((a) => a.title.includes('1731') || a.title.includes('500+'))) {
+        if (
+          parsed.some(
+            (a) =>
+              a.title.includes('1731') ||
+              a.title.includes('500+') ||
+              a.title.includes('1736') ||
+              a.title.includes('541')
+          )
+        ) {
           return initialPortfolioData.achievements;
         }
         return parsed;
@@ -215,8 +230,10 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (
           parsed.leetcodeUsername === 'Akash-314' ||
           parsed.codechefUsername === 'akashkumar314' ||
-          parsed.rating === 1731 ||
-          parsed.totalSolved === 500 ||
+          !parsed.rating ||
+          parsed.rating <= 1736 ||
+          !parsed.totalSolved ||
+          parsed.totalSolved <= 541 ||
           !parsed.codolioUrl
         ) {
           return { ...parsed, ...initialPortfolioData.codingStats };
@@ -232,7 +249,13 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [journey, setJourney] = useState<JourneyMilestone[]>(() => {
     try {
       const saved = localStorage.getItem(`${STORAGE_DATA_KEY}_journey`);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (JSON.stringify(parsed).includes('541') || JSON.stringify(parsed).includes('1736')) {
+          return initialPortfolioData.journey;
+        }
+        return parsed;
+      }
     } catch (e) {
       console.error('Error loading journey from localStorage:', e);
     }

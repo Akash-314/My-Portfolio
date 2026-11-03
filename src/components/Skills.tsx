@@ -11,11 +11,11 @@ export const Skills: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2 flex items-center justify-center gap-1.5">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center justify-center gap-1.5">
             <span>ARSENAL & EXPERTISE</span>
             <AdminShieldTrigger className="opacity-20 hover:opacity-100 text-[#b91c1c]" iconSize={12} />
           </div>
-          <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-3">
+          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
             TECHNICAL SKILLS<span className="text-[#b91c1c]">.</span>
           </h2>
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full" />
@@ -51,11 +51,10 @@ export const Skills: React.FC = () => {
                 </div>
 
                 <span
-                  className={`text-[10px] font-mono font-black uppercase px-3 py-1 rounded-full ${
-                    skill.level === 'ADVANCED'
+                  className={`text-[10px] font-mono font-black uppercase px-3 py-1 rounded-full ${skill.level === 'ADVANCED'
                       ? 'bg-red-50 text-[#b91c1c] border border-red-200'
                       : 'bg-gray-100 text-gray-700 border border-gray-200'
-                  }`}
+                    }`}
                 >
                   {skill.level}
                 </span>

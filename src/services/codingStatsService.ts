@@ -1,6 +1,6 @@
 import type { CodingStats } from '../data/portfolio';
 
-const CACHE_STORAGE_KEY = 'spydyy_coding_stats_cache_v1';
+const CACHE_STORAGE_KEY = 'spydyy_coding_stats_cache_v2';
 const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes cache
 
 export interface LiveStatsResult {
@@ -18,11 +18,15 @@ export interface LiveStatsResult {
 /**
  * Safely fetches with timeout to prevent hung requests
  */
-async function fetchWithTimeout(url: string, timeoutMs = 3500): Promise<Response> {
+async function fetchWithTimeout(
+  url: string,
+  timeoutMs = 3500,
+  options: RequestInit = {}
+): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(timeoutId);
     return response;
   } catch (err) {
@@ -50,8 +54,9 @@ function parseCodeChefHtml(html: string): { rating?: number; stars?: string } | 
 
 /**
  * Multi-tier LeetCode fetcher
- * Tier 1: Fast Vercel serverless proxy (<1s response)
- * Tier 2: Render hosted Alfa API
+ * Tier 1: Fast Vercel serverless proxies for problems solved (faisalshohag) & contest rating (leetcode-badge)
+ * Tier 2: Vite dev GraphQL proxy (if available in dev)
+ * Tier 3: Render hosted Alfa API
  */
 async function fetchLeetCodeStats(username: string): Promise<{
   totalSolved?: number;
@@ -60,81 +65,162 @@ async function fetchLeetCodeStats(username: string): Promise<{
   hard?: number;
   rating?: number;
 } | null> {
-  let solvedStats: {
-    totalSolved?: number;
-    easy?: number;
-    medium?: number;
-    hard?: number;
-    rating?: number;
-  } | null = null;
-
-  // Tier 1: Vercel serverless proxy for problems solved
-  try {
-    const res = await fetchWithTimeout(
-      `https://leetcode-api-faisalshohag.vercel.app/${encodeURIComponent(username)}`,
-      3500
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (data.totalSolved !== undefined && !data.errors) {
-        solvedStats = {
-          totalSolved: data.totalSolved,
-          easy: data.easySolved,
-          medium: data.mediumSolved,
-          hard: data.hardSolved
-        };
-      }
-    }
-  } catch {
-    // Continue to next tier
-  }
-
-  // Tier 2: Render hosted Alfa API for problems solved
-  if (!solvedStats) {
-    try {
-      const res = await fetchWithTimeout(
-        `https://alfa-leetcode-api.onrender.com/userProfile/${encodeURIComponent(username)}`,
-        3500
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data.totalSolved !== undefined && !data.errors) {
-          solvedStats = {
-            totalSolved: data.totalSolved,
-            easy: data.easySolved,
-            medium: data.mediumSolved,
-            hard: data.hardSolved
-          };
+  // Concurrently fetch solved counts and contest rating
+  const [solvedResult, ratingResult] = await Promise.allSettled([
+    (async () => {
+      // Tier 1A: Vercel serverless proxy for problems solved
+      try {
+        const res = await fetchWithTimeout(
+          `https://leetcode-api-faisalshohag.vercel.app/${encodeURIComponent(username)}`,
+          3500
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.totalSolved !== undefined && !data.errors) {
+            return {
+              totalSolved: data.totalSolved,
+              easy: data.easySolved,
+              medium: data.mediumSolved,
+              hard: data.hardSolved
+            };
+          }
         }
+      } catch {
+        // Continue to next tier
       }
-    } catch {
-      // Fallback
-    }
-  }
 
-  // Live Contest Rating fetcher (e.g. 1736)
-  try {
-    const contestRes = await fetchWithTimeout(
-      `https://alfa-leetcode-api.onrender.com/userContestRankingInfo/${encodeURIComponent(username)}`,
-      3500
-    );
-    if (contestRes.ok) {
-      const contestData = await contestRes.json();
-      const rawRating = contestData?.userContestRanking?.rating;
-      if (rawRating && !isNaN(Number(rawRating))) {
-        const parsedRating = Math.round(Number(rawRating));
-        if (solvedStats) {
-          solvedStats.rating = parsedRating;
-        } else {
-          solvedStats = { rating: parsedRating };
+      // Tier 1B: Community cp-rating-api for problems solved
+      try {
+        const res = await fetchWithTimeout(
+          `https://cp-rating-api.vercel.app/leetcode/${encodeURIComponent(username)}`,
+          3500
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.problemsSolved !== undefined && Array.isArray(data.submissions)) {
+            const easy =
+              data.submissions.find((s: { difficulty: string }) => s.difficulty === 'Easy')?.count || 0;
+            const med =
+              data.submissions.find((s: { difficulty: string }) => s.difficulty === 'Medium')?.count || 0;
+            const hard =
+              data.submissions.find((s: { difficulty: string }) => s.difficulty === 'Hard')?.count || 0;
+            return {
+              totalSolved: data.problemsSolved,
+              easy,
+              medium: med,
+              hard
+            };
+          }
         }
+      } catch {
+        // Continue to next tier
       }
-    }
-  } catch {
-    // Fallback
+
+      // Tier 1C: Render hosted Alfa API for problems solved
+      try {
+        const res = await fetchWithTimeout(
+          `https://alfa-leetcode-api.onrender.com/userProfile/${encodeURIComponent(username)}`,
+          3500
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.totalSolved !== undefined && !data.errors) {
+            return {
+              totalSolved: data.totalSolved,
+              easy: data.easySolved,
+              medium: data.mediumSolved,
+              hard: data.hardSolved
+            };
+          }
+        }
+      } catch {
+        // Fallback
+      }
+
+      return null;
+    })(),
+
+    (async () => {
+      // Tier 2A: leetcode-badge API (Fast Vercel edge endpoint that extracts actual contest rating e.g. 1807)
+      try {
+        const badgeRes = await fetchWithTimeout(
+          `https://leetcode-badge.vercel.app/api/users/${encodeURIComponent(username)}`,
+          3500
+        );
+        if (badgeRes.ok) {
+          const badgeData = await badgeRes.json();
+          const rawRating = badgeData?.rating;
+          if (rawRating && !isNaN(Number(rawRating)) && Number(rawRating) > 0) {
+            return {
+              rating: Math.round(Number(rawRating)),
+              solved: badgeData.solved ? Number(badgeData.solved) : undefined
+            };
+          }
+        }
+      } catch {
+        // Continue to next tier
+      }
+
+      // Tier 2B: Vite local GraphQL proxy (if available in dev/proxy)
+      try {
+        const gqlRes = await fetchWithTimeout('/api/leetcode-proxy/graphql', 3500, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: `query userContestRankingInfo($username: String!) {
+              userContestRanking(username: $username) {
+                rating
+              }
+            }`,
+            variables: { username }
+          })
+        });
+        if (gqlRes.ok) {
+          const gqlData = await gqlRes.json();
+          const rawRating = gqlData?.data?.userContestRanking?.rating;
+          if (rawRating && !isNaN(Number(rawRating))) {
+            return { rating: Math.round(Number(rawRating)) };
+          }
+        }
+      } catch {
+        // Continue to next tier
+      }
+
+      // Tier 2C: Render hosted Alfa API for contest rating
+      try {
+        const contestRes = await fetchWithTimeout(
+          `https://alfa-leetcode-api.onrender.com/userContestRankingInfo/${encodeURIComponent(username)}`,
+          3500
+        );
+        if (contestRes.ok) {
+          const contestData = await contestRes.json();
+          const rawRating = contestData?.userContestRanking?.rating;
+          if (rawRating && !isNaN(Number(rawRating))) {
+            return { rating: Math.round(Number(rawRating)) };
+          }
+        }
+      } catch {
+        // Fallback
+      }
+
+      return null;
+    })()
+  ]);
+
+  const solvedData = solvedResult.status === 'fulfilled' ? solvedResult.value : null;
+  const ratingData = ratingResult.status === 'fulfilled' ? ratingResult.value : null;
+
+  if (!solvedData && !ratingData) {
+    return null;
   }
 
-  return solvedStats;
+  return {
+    totalSolved: solvedData?.totalSolved || ratingData?.solved,
+    easy: solvedData?.easy,
+    medium: solvedData?.medium,
+    hard: solvedData?.hard,
+    rating: ratingData?.rating
+  };
 }
 
 /**
@@ -190,12 +276,21 @@ async function fetchCodeChefStats(username: string): Promise<{
 export async function getLiveCodingStats(fallbackStats: CodingStats): Promise<LiveStatsResult> {
   const now = Date.now();
 
+  // Clear legacy cache v1 if present
+  try {
+    localStorage.removeItem('spydyy_coding_stats_cache_v1');
+  } catch {
+    // Ignore storage errors
+  }
+
   // 1. Check local cache first to prevent rate limiting
   try {
     const cachedStr = localStorage.getItem(CACHE_STORAGE_KEY);
     if (cachedStr) {
       const cached = JSON.parse(cachedStr);
-      if (cached.timestamp && now - cached.timestamp < CACHE_DURATION_MS && cached.stats) {
+      // Ensure cached leetcode data has rating >= 1800 if marked synced
+      const isLcValid = !cached.syncedPlatforms?.leetcode || (cached.stats?.rating && cached.stats.rating >= 1800);
+      if (cached.timestamp && now - cached.timestamp < CACHE_DURATION_MS && cached.stats && isLcValid) {
         return {
           stats: { ...fallbackStats, ...cached.stats },
           isLive: Boolean(cached.isLive),
@@ -324,6 +419,7 @@ export async function getLiveCodingStats(fallbackStats: CodingStats): Promise<Li
 export function clearCodingStatsCache(): void {
   try {
     localStorage.removeItem(CACHE_STORAGE_KEY);
+    localStorage.removeItem('spydyy_coding_stats_cache_v1');
   } catch (e) {
     console.warn('Error clearing stats cache:', e);
   }

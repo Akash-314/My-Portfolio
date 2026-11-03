@@ -32,13 +32,13 @@ export const About: React.FC = () => {
             className="lg:col-span-7 flex flex-col items-start"
           >
             {/* Tag */}
-            <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2 flex items-center gap-2">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-2">
               <span className="w-3 h-2 bg-[#b91c1c] rounded-sm" />
               BEHIND THE MASK
             </div>
 
             {/* Heading */}
-            <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-6">
+            <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-6 leading-[0.95]">
               AKASH KUMAR<span className="text-[#b91c1c]">.</span>
             </h2>
 

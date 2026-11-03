@@ -90,11 +90,11 @@ export const Contact: React.FC = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-14 text-center">
-          <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2 flex items-center gap-1">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-1">
             <span className="w-2.5 h-2.5 bg-[#b91c1c] rounded-sm" />
             GET IN TOUCH
           </div>
-          <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-3">
+          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
             CONTACT<span className="text-[#b91c1c]">.</span>
           </h2>
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full" />
@@ -104,7 +104,7 @@ export const Contact: React.FC = () => {
           {/* Left Direct Info Cards */}
           <div className="lg:col-span-4 space-y-3">
             <div className="spydyy-card p-6">
-              <h3 className="text-lg font-extrabold text-[#111827] font-sans mb-2">
+              <h3 className="text-2xl font-normal uppercase tracking-wide text-[#111827] font-display mb-2">
                 Direct Channels
               </h3>
               <p className="text-xs text-gray-600 font-sans leading-relaxed mb-4 font-medium">
@@ -149,7 +149,7 @@ export const Contact: React.FC = () => {
                   <div className="w-14 h-14 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-600 mb-3">
                     <CheckCircle2 className="w-7 h-7" />
                   </div>
-                  <h4 className="text-lg font-bold text-[#111827] font-sans mb-1">
+                  <h4 className="text-2xl font-normal uppercase tracking-wide text-[#111827] font-display mb-1">
                     Signal Transmitted!
                   </h4>
                   <p className="text-xs text-gray-600 font-sans max-w-xs">
@@ -157,7 +157,7 @@ export const Contact: React.FC = () => {
                   </p>
                   <button
                     onClick={() => setStatus('idle')}
-                    className="mt-4 px-5 py-2 rounded-full text-xs font-mono font-bold uppercase text-white bg-[#111827]"
+                    className="mt-4 px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-white bg-[#111827]"
                   >
                     SEND ANOTHER MESSAGE
                   </button>
@@ -221,7 +221,7 @@ export const Contact: React.FC = () => {
                       type="submit"
                       disabled={status === 'submitting'}
                       data-web-target="cta-button"
-                      className="cursor-target w-full py-4 rounded-full text-xs font-black uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
+                      className="cursor-target w-full py-4 rounded-full text-base font-normal font-display uppercase tracking-wider text-white bg-[#b91c1c] hover:bg-[#a71919] shadow-lg shadow-red-900/30 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]"
                     >
                       {status === 'submitting' ? (
                         <span className="flex items-center gap-2 font-mono">

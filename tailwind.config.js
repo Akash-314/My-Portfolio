@@ -7,8 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        bebas: ['"Bebas Neue"', 'cursive', 'sans-serif'],
+        display: ['"Bebas Neue"', 'sans-serif'],
+        bebas: ['"Bebas Neue"', 'sans-serif'],
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
       colors: {
         spider: {

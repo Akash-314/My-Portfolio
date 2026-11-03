@@ -11,10 +11,10 @@ export const Journey: React.FC = () => {
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-black uppercase tracking-widest text-[#b91c1c] font-sans mb-2">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2">
             CHRONOLOGICAL MILESTONES
           </div>
-          <h2 className="text-4xl sm:text-6xl font-black italic tracking-tighter text-[#111827] text-3d-red uppercase font-sans mb-3">
+          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
             MY JOURNEY<span className="text-[#b91c1c]">.</span>
           </h2>
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full" />
@@ -60,7 +60,7 @@ export const Journey: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-extrabold text-[#111827] font-sans mb-1">
+                  <h3 className="text-xl sm:text-2xl font-normal uppercase tracking-wide text-[#111827] font-display mb-1">
                     {item.title}
                   </h3>
 
