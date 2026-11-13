@@ -3,7 +3,14 @@ export interface NeonStatus {
   status: 'ok' | 'error' | 'disconnected';
   branch?: string;
   postgres?: string;
+  database?: string;
+  user?: string;
+  postgresVersion?: string;
+  tablesCount?: number;
+  latencyMs?: number;
   objectStorage?: string;
+  timestamp?: string;
+  error?: string;
 }
 
 export interface StoredMessage {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
+import { CinematicReveal } from '../motion/CinematicReveal';
 
 export const MarqueeRibbons: React.FC = () => {
   const { codingStats } = usePortfolio();
@@ -12,11 +13,11 @@ export const MarqueeRibbons: React.FC = () => {
     'FULL STACK ENGINEER',
     'C++ & DSA SPECIALIST',
     `LEETCODE ${solvedCount} SOLVED`,
-    'ARJUNA 2.0 WINNER'
+    'ARJUNA 2.0 WINNER',
   ];
 
   return (
-    <div className="relative py-12 overflow-hidden select-none z-20 my-6">
+    <CinematicReveal revealStyle="fade-up" className="relative py-12 overflow-hidden select-none z-20 my-6">
       {/* Top Banner (Crimson Red, Tilted -2.5 deg) */}
       <div className="relative transform -rotate-2 bg-[#b91c1c] text-white py-3.5 shadow-xl border-y border-red-900 overflow-hidden z-10">
         <div className="animate-marquee whitespace-nowrap flex items-center font-normal font-display tracking-wider text-xl sm:text-2xl uppercase">
@@ -40,6 +41,6 @@ export const MarqueeRibbons: React.FC = () => {
           ))}
         </div>
       </div>
-    </div>
+    </CinematicReveal>
   );
 };

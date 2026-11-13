@@ -17,6 +17,8 @@ import { GlobalCursor } from './components/GlobalCursor';
 import { TargetCursor } from './components/TargetCursor';
 import { GlobalWebNetwork } from './components/effects/GlobalWebNetwork';
 import { ScrollProgressSpider } from './components/effects/ScrollProgressSpider';
+import { GlobalScrollProgress } from './components/effects/GlobalScrollProgress';
+import { ContinuousSpiderWebThread } from './components/effects/ContinuousSpiderWebThread';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 const AdminDashboard = lazy(() =>
@@ -136,7 +138,10 @@ function PortfolioMain() {
 
   return (
     <div className="relative min-h-screen bg-[#fcfcfc] text-[#111827] font-sans overflow-x-hidden">
-      {/* Global Target Cursor (React Bits GSAP targeting core) */}
+      {/* 1. Global Crimson Scroll Progress Bar (Top Edge) */}
+      <GlobalScrollProgress />
+
+      {/* 2. Global Target Cursor (React Bits GSAP targeting core) */}
       <TargetCursor
         targetSelector=".cursor-target"
         spinDuration={3}
@@ -147,13 +152,16 @@ function PortfolioMain() {
         cursorColorOnTarget="#dc2626"
       />
 
-      {/* Tactile Spider-Web Click Shockwaves */}
+      {/* 3. Tactile Spider-Web Click Shockwaves */}
       <GlobalCursor />
 
-      {/* Feature 2 & 3: Cursor-reactive Full-Page Web Network and Connection Strands */}
+      {/* 4. Cursor-reactive Full-Page Web Network */}
       <GlobalWebNetwork />
 
-      {/* Feature 22: Scroll Progress Spider on Right Viewport Edge */}
+      {/* 5. Continuous Scroll-Linked Spider-Web Thread through Sections */}
+      <ContinuousSpiderWebThread />
+
+      {/* 6. Right Edge Scroll Progress Spider */}
       <ScrollProgressSpider />
 
       {/* Initial Loader */}
@@ -161,7 +169,7 @@ function PortfolioMain() {
         <Loader onFinish={() => setLoading(false)} />
       ) : (
         <>
-          {/* Top Fixed Header */}
+          {/* Smart Sticky Header with Active Section Animation */}
           <Navbar activeSection={activeSection} />
 
           {/* Main Portfolio Sections */}

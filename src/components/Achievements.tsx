@@ -1,14 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { Trophy, Star, Award, ChevronRight, Zap } from 'lucide-react';
+import { motion, AnimatePresence, useInView, useScroll, useSpring } from 'framer-motion';
+import { Trophy, Zap } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
+import { SplitWordReveal } from '../motion/SplitWordReveal';
+import { CinematicReveal } from '../motion/CinematicReveal';
+import { EASINGS } from '../motion/motionTokens';
 import type { Achievement } from '../data/portfolio';
 
 export const Achievements: React.FC = () => {
   const { achievements } = usePortfolio();
+  const sectionRef = useRef<HTMLElement | null>(null);
   const spotlightRef = useRef<HTMLDivElement | null>(null);
   const isSpotlightInView = useInView(spotlightRef, { once: true, amount: 0.25 });
   const [unlockPhase, setUnlockPhase] = useState<0 | 1 | 2 | 3 | 4>(0);
+
+  // Scroll timeline progress for drawing central line
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start center', 'end center'],
+  });
+  const lineProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 25,
+    restDelta: 0.001,
+  });
 
   // Selected achievement for spotlight inspection
   const [selectedId, setSelectedId] = useState<string>(
@@ -33,238 +48,180 @@ export const Achievements: React.FC = () => {
   }, [isSpotlightInView, selectedAchievement?.featured, unlockPhase]);
 
   return (
-    <section id="achievements" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden">
+    <section
+      ref={sectionRef}
+      id="achievements"
+      className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-[#b91c1c]" /> CONNECTED HACKATHON & CODING PODIUMS
-          </div>
-          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
-            ACHIEVEMENTS<span className="text-[#b91c1c]">.</span>
-          </h2>
+          <CinematicReveal revealStyle="fade-up">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5 justify-center">
+              <Zap className="w-3.5 h-3.5 text-[#b91c1c]" /> CONNECTED HACKATHON & CODING PODIUMS
+            </div>
+          </CinematicReveal>
+
+          <SplitWordReveal
+            text="ACHIEVEMENTS."
+            as="h2"
+            className="text-5xl sm:text-7xl lg:text-8xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95] justify-center"
+            highlightWords={['ACHIEVEMENTS.']}
+          />
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full mb-3" />
           <p className="text-xs font-sans font-bold uppercase tracking-[0.15em] text-gray-500 max-w-lg">
             INTERCONNECTED WEB OF VICTORIES & COMPETITIVE BENCHMARKS
           </p>
         </div>
 
-        {/* 1. Spider-Web Constellation Chain (Interactive Node Graph) */}
-        <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-white border border-gray-200 shadow-md relative overflow-hidden">
-          {/* Subtle Spider Web Background Watermark */}
-          <div className="absolute -right-10 -bottom-10 opacity-5 pointer-events-none w-72 h-72">
-            <svg viewBox="0 0 100 100" className="w-full h-full stroke-black fill-none">
-              <circle cx="50" cy="50" r="45" strokeWidth="0.5" />
-              <circle cx="50" cy="50" r="30" strokeWidth="0.5" />
-              <circle cx="50" cy="50" r="15" strokeWidth="0.5" />
-              <line x1="5" y1="50" x2="95" y2="50" strokeWidth="0.5" />
-              <line x1="50" y1="5" x2="50" y2="95" strokeWidth="0.5" />
-              <line x1="18" y1="18" x2="82" y2="82" strokeWidth="0.5" />
-              <line x1="18" y1="82" x2="82" y2="18" strokeWidth="0.5" />
-            </svg>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 mb-6 border-b border-gray-100">
-            <div>
-              <span className="text-xs font-mono font-black uppercase text-[#b91c1c] tracking-widest flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#b91c1c] animate-ping" />
-                SPIDER-WEB CHAIN MATRIX
+        {/* Constellation Web Connection Bar */}
+        <CinematicReveal revealStyle="scale" delay={0.15} className="mb-12">
+          <div className="p-4 rounded-2xl border border-red-200/80 bg-red-50/40 backdrop-blur-sm flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
+              <span className="text-xs font-mono font-bold uppercase text-red-900 tracking-wider">
+                PODIUM CONSTELLATION MESH:
               </span>
-              <p className="text-[11px] font-mono text-gray-500 font-semibold">
-                Click any milestone node in the webbed chain to inspect details
-              </p>
             </div>
-            <span className="px-3 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-red-50 text-[#b91c1c] border border-red-200">
-              {achievements.length} CHAINED PODIUMS
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {achievements.map((ach) => (
+                <button
+                  key={ach.id}
+                  onClick={() => setSelectedId(ach.id)}
+                  className={`cursor-target px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all ${
+                    selectedId === ach.id
+                      ? 'bg-red-600 text-white shadow-md shadow-red-950/20 scale-105'
+                      : 'bg-white border border-gray-200 text-gray-700 hover:border-red-300'
+                  }`}
+                >
+                  {ach.year} • {ach.title.split('—')[0].trim()}
+                </button>
+              ))}
+            </div>
           </div>
+        </CinematicReveal>
 
-          {/* Interactive Webbed Chain Track */}
-          <div className="relative py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-              {achievements.map((ach, idx) => {
-                const isSelected = ach.id === selectedId;
-                return (
-                  <motion.div
-                    key={ach.id}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setSelectedId(ach.id)}
-                    className={`cursor-target cursor-pointer p-4 rounded-2xl border-2 transition-all relative ${
+        {/* 2-Column Responsive Layout: Left Timeline, Right Spotlight Card */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Left Column: Achievement List with Scroll-drawn Thread */}
+          <div className="lg:col-span-5 relative pl-6 sm:pl-8 border-l-2 border-red-200 space-y-6">
+            {/* Animated Red Fill Overlay */}
+            <motion.div
+              style={{ scaleY: lineProgress }}
+              className="absolute left-[-2px] top-0 bottom-0 w-[2px] bg-[#b91c1c] origin-top pointer-events-none"
+            />
+
+            {achievements.map((ach, idx) => {
+              const isSelected = selectedId === ach.id;
+              return (
+                <motion.div
+                  key={ach.id}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.5, delay: idx * 0.1, ease: EASINGS.cinematic }}
+                  onClick={() => setSelectedId(ach.id)}
+                  className={`cursor-target p-6 rounded-2xl border transition-all duration-300 relative group ${
+                    isSelected
+                      ? 'border-red-600 bg-red-50/40 shadow-xl ring-1 ring-red-600/30 -translate-y-0.5'
+                      : 'border-gray-200 bg-white hover:border-red-300 hover:bg-gray-50/50 shadow-sm'
+                  }`}
+                >
+                  {/* Timeline Anchor Node */}
+                  <div
+                    className={`absolute -left-[35px] sm:-left-[43px] top-6 w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${
                       isSelected
-                        ? 'border-[#b91c1c] bg-red-50/50 shadow-lg shadow-red-900/10'
-                        : 'border-gray-200 bg-gray-50/70 hover:border-red-300 hover:bg-white'
+                        ? 'border-red-600 bg-red-600 text-white scale-110 shadow-md'
+                        : 'border-red-400 bg-white text-red-600'
                     }`}
                   >
-                    {/* Node Web Badge */}
-                    <div className="flex items-center justify-between mb-2.5">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-black ${
-                            isSelected
-                              ? 'bg-[#b91c1c] text-white'
-                              : 'bg-white text-gray-700 border border-gray-300'
-                          }`}
-                        >
-                          {idx + 1}
-                        </div>
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-gray-500">
-                          WEB LINK #{idx + 1}
-                        </span>
-                      </div>
-                      {ach.featured && (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
-                          <Trophy className="w-2.5 h-2.5 text-amber-600" /> TOP PODIUM
-                        </span>
-                      )}
-                    </div>
+                    <Trophy className="w-3 h-3" />
+                  </div>
 
-                    <h4 className="text-base font-normal uppercase tracking-wide text-[#111827] font-display line-clamp-1 mb-1">
-                      {ach.title}
-                    </h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-red-600">
+                      {ach.year} • {ach.organizer}
+                    </span>
+                    {ach.featured && (
+                      <span className="text-[10px] font-mono font-bold bg-red-600 text-white px-2 py-0.5 rounded-full">
+                        FEATURED
+                      </span>
+                    )}
+                  </div>
 
-                    <div className="text-xs font-display tracking-wider text-[#b91c1c] uppercase mb-2">
-                      {ach.position} • {ach.year}
-                    </div>
+                  <h3 className="text-lg sm:text-xl font-display font-normal text-[#111827] uppercase tracking-tight mb-2">
+                    {ach.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm font-sans text-gray-600 line-clamp-2 leading-relaxed">
+                    {ach.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
 
-                    {/* Chain indicator */}
-                    <div className="pt-2 border-t border-gray-200/60 flex items-center justify-between text-[10px] font-mono text-gray-500 font-semibold">
-                      <span>{ach.organizer}</span>
-                      <span className="text-[#b91c1c] font-bold flex items-center">
-                        INSPECT <ChevronRight className="w-3 h-3" />
+          {/* Right Column: Holographic Spotlight Display Card */}
+          <div ref={spotlightRef} className="lg:col-span-7 sticky top-28">
+            <AnimatePresence mode="wait">
+              {selectedAchievement && (
+                <motion.div
+                  key={selectedAchievement.id}
+                  initial={{ opacity: 0, y: 25, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -25, scale: 0.98 }}
+                  transition={{ duration: 0.45, ease: EASINGS.cinematic }}
+                  className="bg-white border-2 border-red-600 rounded-3xl p-6 sm:p-10 lg:p-12 shadow-2xl relative overflow-hidden"
+                >
+                  {/* Subtle Spider Badge Corner Watermark */}
+                  <div className="absolute top-0 right-0 -mr-6 -mt-6 w-40 h-40 rounded-full bg-red-500/10 pointer-events-none blur-xl" />
+
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-red-600" />
+                      <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-red-600">
+                        {selectedAchievement.position || 'TOP PODIUM'}
                       </span>
                     </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Featured / Selected Achievement Spotlight Card */}
-        <AnimatePresence mode="wait">
-          {selectedAchievement && (
-            <motion.div
-              key={selectedAchievement.id}
-              ref={spotlightRef}
-              data-web-target="achievement-card"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35 }}
-              style={{
-                boxShadow: unlockPhase === 3 ? '0 0 28px rgba(220, 38, 38, 0.25)' : undefined,
-                transition: 'box-shadow 0.4s ease'
-              }}
-              className="cursor-target spydyy-card p-8 sm:p-12 border-2 border-red-500/60 relative overflow-hidden bg-gradient-to-br from-white via-white to-red-50/30"
-            >
-              {/* Feature 8: Step 2 Thin Web Line Perimeter Draw */}
-              {selectedAchievement.featured && (
-                <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none rounded-3xl"
-                  style={{ overflow: 'visible' }}
-                >
-                  <motion.rect
-                    x="1"
-                    y="1"
-                    width="calc(100% - 2px)"
-                    height="calc(100% - 2px)"
-                    rx="24"
-                    fill="none"
-                    stroke="#dc2626"
-                    strokeWidth="1.5"
-                    strokeDasharray="1400"
-                    initial={{ strokeDashoffset: 1400 }}
-                    animate={{ strokeDashoffset: unlockPhase >= 2 ? 0 : 1400 }}
-                    transition={{ duration: 0.55, ease: 'easeInOut' }}
-                  />
-                </svg>
-              )}
-
-              {/* Feature 8: Step 1 & 3 Unlock Node / Badge */}
-              {selectedAchievement.featured && (
-                <div className="absolute top-4 right-4 z-20 pointer-events-none">
-                  <AnimatePresence>
-                    {unlockPhase >= 1 && (
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex items-center gap-1.5"
-                      >
-                        {unlockPhase >= 3 ? (
-                          <span className="px-3 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-red-600 text-white shadow-sm flex items-center gap-1.5 border border-red-500">
-                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                            ACHIEVEMENT UNLOCKED
-                          </span>
-                        ) : (
-                          <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                {/* Left Trophy/Medal Badge */}
-                <div className="lg:col-span-4 flex justify-center">
-                  <div className="w-48 h-48 rounded-3xl bg-gradient-to-b from-amber-50 via-white to-amber-100/70 border-2 border-amber-400 flex flex-col items-center justify-center p-4 shadow-xl relative group">
-                    <span className="text-[10px] font-mono font-black uppercase tracking-widest text-amber-700 mb-2">
-                      {selectedAchievement.featured ? 'GOLD MEDALIST' : 'HONOR RECOGNITION'}
-                    </span>
-                    {selectedAchievement.featured ? (
-                      <Trophy className="w-16 h-16 text-amber-500 drop-shadow-md group-hover:scale-110 transition-transform" />
-                    ) : (
-                      <Award className="w-16 h-16 text-red-600 drop-shadow-md group-hover:scale-110 transition-transform" />
-                    )}
-                    <span className="text-base font-display font-normal text-[#111827] mt-3 uppercase tracking-wider text-center">
-                      {selectedAchievement.position}
-                    </span>
-                    <span className="text-xs font-display text-gray-600 mt-1 uppercase tracking-wider text-center">
-                      {selectedAchievement.organizer} • {selectedAchievement.year}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right Detailed Narrative */}
-                <div className="lg:col-span-8 flex flex-col justify-center">
-                  <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                    <span className="px-3.5 py-1 rounded-md bg-[#b91c1c] text-white font-display text-sm tracking-wider uppercase">
-                      {selectedAchievement.position}
-                    </span>
-                    <span className="text-xs font-display tracking-wider text-gray-600 uppercase flex items-center gap-1">
-                      EVENT: {selectedAchievement.event}
+                    <span className="text-xs font-mono font-bold text-gray-500 uppercase">
+                      YEAR {selectedAchievement.year}
                     </span>
                   </div>
 
-                  <h3 className="text-3xl sm:text-5xl font-normal uppercase tracking-tight text-[#111827] font-display mb-2 leading-none">
+                  <h3 className="text-3xl sm:text-5xl font-display font-normal text-[#111827] uppercase tracking-tight mb-4">
                     {selectedAchievement.title}
                   </h3>
 
-                  <div className="text-sm sm:text-base font-display tracking-widest text-[#b91c1c] uppercase mb-4">
-                    ORGANIZER: {selectedAchievement.organizer} — {selectedAchievement.year}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 border border-gray-200 mb-6">
+                    <p className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-1">
+                      ORGANIZER / EVENT:
+                    </p>
+                    <p className="text-sm sm:text-base font-bold text-gray-800 font-sans">
+                      {selectedAchievement.organizer} ({selectedAchievement.event})
+                    </p>
                   </div>
 
-                  <p className="text-gray-700 text-base sm:text-lg leading-relaxed font-sans font-medium mb-6">
+                  <p className="text-base sm:text-lg text-gray-700 font-sans leading-relaxed mb-6 font-normal">
                     {selectedAchievement.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-2">
-                    {selectedAchievement.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-white text-gray-800 border border-gray-300 flex items-center gap-1.5 shadow-sm"
-                      >
-                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  {/* Tags */}
+                  {selectedAchievement.tags && selectedAchievement.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+                      {selectedAchievement.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold bg-red-50 text-red-700 border border-red-200"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </section>
   );

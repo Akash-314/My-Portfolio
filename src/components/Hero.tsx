@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { Download, Compass } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { usePortfolio } from '../context/PortfolioContext';
@@ -8,8 +8,7 @@ import { SpiderMaskReveal } from './SpiderMaskReveal';
 import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 import { WebMagneticButton } from './WebMagneticButton';
 import { ElasticLettering } from './ElasticLettering';
-import { SPIDER_EFFECTS_CONFIG } from '../config/spiderEffectsConfig';
-import { globalScrollPhysics, type ScrollPhysicsState } from '../utils/scrollPhysics';
+import { EASINGS } from '../motion/motionTokens';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -23,58 +22,25 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
     effectiveResumePath.startsWith('http://') || effectiveResumePath.startsWith('https://');
 
   const heroRef = useRef<HTMLElement | null>(null);
-  const heroSuitWrapperRef = useRef<HTMLDivElement | null>(null);
-  const cornerWebsWrapperRef = useRef<HTMLDivElement | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
-  // Subtle Hero Parallax (Section 10: 5–20px total, 0° rotation strictly grounded)
-  useEffect(() => {
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Scroll-linked depth parallax for Hero layers
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
 
-    if (prefersReducedMotion || !heroRef.current) return;
+  // Layer 1: Distant background Spider Suit: subtle move down + gentle scale
+  const bgY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 80]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, shouldReduceMotion ? 1 : 1.05]);
+  const bgOpacity = useTransform(scrollYProgress, [0, 0.85, 1], [1, 0.9, 0.4]);
 
-    let unsubscribeScroll: (() => void) | null = null;
+  // Layer 2: Decorative Corner Webs move at a different rate
+  const webY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 40]);
 
-    const onScrollPhysics = (state: ScrollPhysicsState) => {
-      const scrollY = state.scrollY;
-      if (scrollY <= window.innerHeight * 1.3) {
-        const heroY = Math.min(SPIDER_EFFECTS_CONFIG.HERO_PARALLAX_MAX, scrollY * 0.035);
-        const webY = Math.min(10, scrollY * 0.02);
-        if (heroSuitWrapperRef.current) {
-          heroSuitWrapperRef.current.style.transform = `translate3d(0, ${heroY.toFixed(1)}px, 0)`;
-        }
-        if (cornerWebsWrapperRef.current) {
-          cornerWebsWrapperRef.current.style.transform = `translate3d(0, ${webY.toFixed(1)}px, 0)`;
-        }
-      }
-    };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!unsubscribeScroll) {
-            unsubscribeScroll = globalScrollPhysics.subscribe(onScrollPhysics);
-          }
-        } else {
-          if (unsubscribeScroll) {
-            unsubscribeScroll();
-            unsubscribeScroll = null;
-          }
-        }
-      },
-      { rootMargin: '100px 0px' }
-    );
-
-    observer.observe(heroRef.current);
-
-    return () => {
-      observer.disconnect();
-      if (unsubscribeScroll) {
-        unsubscribeScroll();
-      }
-    };
-  }, []);
+  // Layer 3: Foreground Headline & Content gently drifts up and fades cleanly
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -50]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.85, 0]);
 
   const handleResumeClick = () => {
     if (!isExternalUrl && !effectiveResumePath.startsWith('data:')) {
@@ -96,36 +62,53 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
       id="hero"
       className="relative w-screen h-screen min-h-screen flex items-center justify-center pt-16 bg-[#fcfcfc] overflow-hidden"
     >
-      {/* Full Page 100vw x 100vh Spider-Man Suit Background with subtle parallax */}
-      <div
-        ref={heroSuitWrapperRef}
+      {/* 1. Cinematic Starting Signal Node */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="absolute top-20 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center"
+      >
+        <span className="w-2.5 h-2.5 rounded-full bg-[#b91c1c] shadow-[0_0_14px_#b91c1c]" />
+        <motion.div
+          initial={{ height: 0 }}
+          animate={{ height: 40 }}
+          transition={{ duration: 0.5, delay: 0.3, ease: EASINGS.cinematic }}
+          className="w-[1.5px] bg-gradient-to-b from-[#b91c1c] to-transparent"
+        />
+      </motion.div>
+
+      {/* Layer 1: Spider-Man Suit Background with Scroll-Linked Depth Parallax */}
+      <motion.div
+        style={{ y: bgY, scale: bgScale, opacity: bgOpacity }}
         className="absolute inset-0 w-full h-full z-0 will-change-transform"
-        style={{ transition: 'transform 0.05s linear' }}
       >
         <SpiderMaskReveal
           spidermanImage="/assets/spider/hero.png"
           className="w-full h-full"
         />
-      </div>
+      </motion.div>
 
-      {/* Corner Spider Web Graphic SVGs with subtle parallax */}
-      <div
-        ref={cornerWebsWrapperRef}
+      {/* Layer 2: Corner Spider Web Graphic SVGs with Distinct Parallax Layering */}
+      <motion.div
+        style={{ y: webY }}
         className="absolute inset-0 w-full h-full pointer-events-none z-10 will-change-transform"
-        style={{ transition: 'transform 0.05s linear' }}
       >
         <CornerWebTopLeft className="w-80 sm:w-[500px]" />
         <CornerWebBottomRight className="w-80 sm:w-[500px]" />
-      </div>
+      </motion.div>
 
-      {/* Foreground Hero Text Content & Action Buttons */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-20 pointer-events-none">
+      {/* Layer 3: Foreground Content with Counter-Motion & Smooth Viewport Exit */}
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity }}
+        className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-20 pointer-events-none will-change-transform"
+      >
         <div className="lg:col-span-7 flex flex-col items-start text-left pointer-events-auto">
-          {/* Eyebrow Tagline */}
+          {/* Eyebrow Tagline with staged entrance */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.25, ease: EASINGS.cinematic }}
             className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-3 flex items-center gap-2"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-[#b91c1c] animate-pulse" />
@@ -133,12 +116,12 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             <AdminShieldTrigger className="opacity-25 hover:opacity-100 text-[#b91c1c] ml-0.5" iconSize={12} />
           </motion.div>
 
-          {/* Strong Superhero Display Heading with Elastic Lettering */}
+          {/* Superhero Display Heading with Elastic Lettering */}
           <motion.div
-            initial={{ opacity: 0, x: -25 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-8"
+            initial={{ opacity: 0, x: -30, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 0.8, delay: 0.35, ease: EASINGS.cinematic }}
+            className="mb-6"
           >
             <ElasticLettering
               as="h1"
@@ -162,11 +145,21 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             />
           </motion.div>
 
+          {/* Supporting Headline text */}
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55, ease: EASINGS.cinematic }}
+            className="text-xs sm:text-sm font-mono uppercase tracking-[0.18em] text-gray-600 mb-8 max-w-lg"
+          >
+            {personal.role}
+          </motion.p>
+
           {/* Action Capsule Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.7, ease: EASINGS.cinematic }}
             className="flex flex-wrap items-center gap-4 w-full sm:w-auto"
           >
             {/* Solid Red Primary Capsule Button */}
@@ -198,7 +191,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             </WebMagneticButton>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

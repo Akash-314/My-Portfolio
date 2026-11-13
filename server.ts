@@ -39,10 +39,28 @@ app.get('/api/neon/health', async (_req, res) => {
   try {
     let pgStatus = 'disabled';
     let s3Status = 'disabled';
+    let currentDb = null;
+    let currentUser = null;
+    let pgVersion = null;
+    let tablesCount = 0;
+    let latencyMs = 0;
 
     if (sql) {
-      const result = await sql.query('SELECT NOW() as now, version() as version;');
-      pgStatus = result ? 'connected' : 'error';
+      const start = Date.now();
+      const result = await sql.query('SELECT NOW() as now, current_database() as db, current_user as user_name, version() as version;');
+      latencyMs = Date.now() - start;
+      if (result && result.length > 0) {
+        pgStatus = 'connected';
+        currentDb = result[0].db;
+        currentUser = result[0].user_name;
+        pgVersion = result[0].version?.split(' ')?.[1] || '18';
+      }
+      const tables = await sql.query(`
+        SELECT count(*)::int as count 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public';
+      `);
+      tablesCount = tables[0]?.count || 0;
     }
 
     if (s3) {
@@ -53,10 +71,67 @@ app.get('/api/neon/health', async (_req, res) => {
       status: 'ok',
       branch: process.env.NEON_BRANCH || 'production',
       postgres: pgStatus,
+      database: currentDb,
+      user: currentUser,
+      postgresVersion: pgVersion,
+      tablesCount,
+      latencyMs,
       objectStorage: s3Status,
+      timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
     res.status(500).json({ status: 'error', message: err?.message || String(err) });
+  }
+});
+
+// --- POSTGRES: Portfolio Data Endpoints ---
+app.get('/api/portfolio/all', async (_req, res) => {
+  if (!sql) return res.status(503).json({ error: 'Neon Postgres not configured' });
+  try {
+    const [profiles, projects, technologies, categories, skills, achievements] = await Promise.all([
+      sql.query('SELECT * FROM profiles LIMIT 1;'),
+      sql.query('SELECT * FROM projects ORDER BY display_order ASC, created_at DESC;'),
+      sql.query('SELECT * FROM project_technologies ORDER BY display_order ASC;'),
+      sql.query('SELECT * FROM skill_categories ORDER BY display_order ASC;'),
+      sql.query('SELECT * FROM skills ORDER BY display_order ASC;'),
+      sql.query('SELECT * FROM achievements ORDER BY display_order ASC, date_achieved DESC;')
+    ]);
+
+    // Map technologies into projects
+    const techByProj = new Map<string, string[]>();
+    technologies.forEach((t: any) => {
+      const list = techByProj.get(t.project_id) || [];
+      list.push(t.technology_name);
+      techByProj.set(t.project_id, list);
+    });
+
+    const enrichedProjects = projects.map((p: any) => ({
+      id: p.slug || p.id,
+      title: p.title,
+      subtitle: p.tagline,
+      description: p.description,
+      problemStatement: p.problem_statement,
+      solution: p.solution,
+      tags: techByProj.get(p.id) || [],
+      githubUrl: p.github_url,
+      liveUrl: p.live_demo_url,
+      featured: Boolean(p.featured),
+      published: Boolean(p.published),
+      order: p.display_order,
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        profile: profiles[0] || null,
+        projects: enrichedProjects,
+        skillCategories: categories,
+        skills,
+        achievements,
+      }
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Database query error' });
   }
 });
 
@@ -188,8 +263,12 @@ app.get('/api/storage/file', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Neon backend server running on http://localhost:${port}`);
-});
+// Only bind port in standalone Node environments (avoid binding when running in Vercel serverless)
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Neon backend server running on http://localhost:${port}`);
+  });
+}
+
 export default app;
 

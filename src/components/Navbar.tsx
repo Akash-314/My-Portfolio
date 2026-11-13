@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
@@ -9,28 +9,41 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 30) {
-        setScrolled(true);
+      const currentScrollY = window.scrollY;
+
+      // Smart sticky navbar behavior:
+      // Hide on scroll down after 150px, show on scroll up
+      if (currentScrollY > 150) {
+        if (currentScrollY > lastScrollYRef.current && currentScrollY - lastScrollYRef.current > 6) {
+          setVisible(false);
+        } else if (lastScrollYRef.current - currentScrollY > 6) {
+          setVisible(true);
+        }
       } else {
-        setScrolled(false);
+        setVisible(true);
       }
+
+      setScrolled(currentScrollY > 30);
+      lastScrollYRef.current = currentScrollY;
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navLinks = [
-    { name: 'ABOUT', href: '#about' },
-    { name: 'SKILLS', href: '#skills' },
-    { name: 'PROJECTS', href: '#projects' },
-    { name: 'ACHIEVEMENTS', href: '#achievements' },
-    { name: 'CODING', href: '#coding' },
-    { name: 'JOURNEY', href: '#journey' },
-    { name: 'CONTACT', href: '#contact' },
+    { name: 'ABOUT', href: '#about', id: 'about' },
+    { name: 'SKILLS', href: '#skills', id: 'skills' },
+    { name: 'PROJECTS', href: '#projects', id: 'projects' },
+    { name: 'ACHIEVEMENTS', href: '#achievements', id: 'achievements' },
+    { name: 'CODING', href: '#coding', id: 'coding' },
+    { name: 'JOURNEY', href: '#journey', id: 'journey' },
+    { name: 'CONTACT', href: '#contact', id: 'contact' },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -45,127 +58,100 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        visible ? 'translate-y-0' : '-translate-y-full'
+      } ${
         scrolled
-          ? 'bg-[#0f0f12] border-b border-gray-800/80 shadow-md'
-          : 'bg-transparent border-b border-transparent backdrop-blur-[2px]'
+          ? 'bg-[#0f0f12]/95 backdrop-blur-md border-b border-gray-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.4)] py-3'
+          : 'bg-[#0f0f12]/40 backdrop-blur-[4px] border-b border-white/5 py-4'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Logo: SP4RK. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        {/* Brand Logo & Name: SP4RK. */}
         <a
           href="#hero"
           onClick={(e) => handleNavClick(e, '#hero')}
-          className="flex items-center gap-2 group focus:outline-none"
+          className="cursor-target flex items-center gap-2.5 group focus:outline-none"
           aria-label="Akash Kumar Portfolio Home"
         >
-          <img
-            src="/assets/favicon.ico"
-            alt="SP4RK Logo"
-            className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_8px_rgba(220,38,38,0.4)]"
-          />
-          <span
-            className={`font-display text-3xl sm:text-4xl tracking-tight transition-colors ${
-              scrolled ? 'text-white' : 'text-[#111827]'
-            }`}
-          >
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            <img
+              src="/assets/favicon.ico"
+              alt="SP4RK Logo"
+              className="w-7 h-7 object-contain rounded-full transition-transform group-hover:scale-110 drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+            />
+          </div>
+          <span className="font-display text-2xl sm:text-3xl tracking-tight text-white uppercase transition-colors">
             SP<span className="text-[#b91c1c]">4</span>RK<span className="text-[#b91c1c]">.</span>
           </span>
         </a>
 
-        {/* Desktop Links with Feature 10: Navigation Web Trail */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8 relative py-2">
-          {/* Subtle thin connecting web trail strand */}
-          <div
-            className={`absolute bottom-0 left-2 right-2 h-[1px] pointer-events-none transition-colors duration-300 ${
-              scrolled ? 'bg-red-500/20' : 'bg-red-500/25'
-            }`}
-          />
-
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center space-x-1 sm:space-x-2">
           {navLinks.map((link) => {
-            const sectionId = link.href.substring(1);
-            const isActive = activeSection === sectionId;
-
+            const isActive = activeSection === link.id;
             return (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                data-web-target="nav-item"
-                className={`relative py-1 text-base tracking-[0.12em] transition-colors font-display uppercase font-normal ${
+                className={`cursor-target relative px-3 py-1.5 text-xs font-bold tracking-[0.14em] font-sans uppercase transition-colors ${
                   isActive
                     ? 'text-[#b91c1c]'
-                    : scrolled
-                    ? 'text-gray-300 hover:text-white'
-                    : 'text-gray-800 hover:text-[#b91c1c]'
+                    : 'text-gray-300 hover:text-white'
                 }`}
               >
                 {link.name}
-
-                {/* Gliding active node on web trail */}
                 {isActive && (
-                  <motion.div
-                    layoutId="active-nav-web-node"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#b91c1c] shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
-                    <span className="absolute w-4 h-[1px] bg-[#b91c1c]/60 -z-10" />
-                  </motion.div>
+                  <motion.span
+                    layoutId="activeNavIndicator"
+                    className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#b91c1c] rounded-full shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
                 )}
               </a>
             );
           })}
         </nav>
 
-        {/* Mobile Hamburger Toggle */}
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className={`md:hidden p-2 rounded-lg focus:outline-none transition-colors ${
-            scrolled ? 'text-gray-300 hover:text-white' : 'text-[#111827]'
-          }`}
-          aria-label="Toggle Menu"
-          aria-expanded={mobileMenuOpen}
-          aria-controls="mobile-nav-menu"
-        >
-          {mobileMenuOpen ? (
-            <X className="w-6 h-6 text-red-500" />
-          ) : (
-            <Menu className="w-6 h-6" />
-          )}
-        </button>
+        {/* Mobile Menu Toggle Button */}
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="cursor-target p-2 rounded-lg text-gray-300 hover:text-white focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6 text-red-500" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Menu (Dark Themed) */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            id="mobile-nav-menu"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden bg-[#0f0f12] border-b border-gray-800 px-6 py-4"
+            transition={{ duration: 0.25 }}
+            className="md:hidden bg-[#0f0f12] border-b border-gray-800 px-4 pt-2 pb-6 space-y-1 shadow-2xl overflow-hidden"
           >
-            <div className="flex flex-col gap-3">
-              {navLinks.map((link) => {
-                const sectionId = link.href.substring(1);
-                const isActive = activeSection === sectionId;
-
-                return (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className={`py-2 text-lg font-display tracking-[0.12em] uppercase font-normal ${
-                      isActive ? 'text-[#b91c1c]' : 'text-gray-300'
-                    }`}
-                  >
-                    {link.name}
-                  </a>
-                );
-              })}
-            </div>
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.id;
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className={`block px-3 py-2 rounded-md text-sm font-bold tracking-wider font-sans uppercase transition-colors ${
+                    isActive
+                      ? 'text-[#b91c1c] bg-red-950/30 border-l-2 border-[#b91c1c]'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>

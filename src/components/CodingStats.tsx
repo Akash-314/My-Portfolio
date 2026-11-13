@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Terminal, ExternalLink, Code2, Flame, BarChart3, Award, Star } from 'lucide-react';
+import { Code2, Flame, BarChart3, Star, ExternalLink } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
-import { GithubIcon } from './Icons';
 import { AdminShieldTrigger } from './admin/AdminShieldTrigger';
 import { getLiveCodingStats, type LiveStatsResult } from '../services/codingStatsService';
 import { WebMagneticButton } from './WebMagneticButton';
+import { SplitWordReveal } from '../motion/SplitWordReveal';
+import { CinematicReveal } from '../motion/CinematicReveal';
+import { EASINGS } from '../motion/motionTokens';
 
 const CountUpNumber: React.FC<{ target: number; duration?: number }> = ({ target, duration = 1.2 }) => {
   const [count, setCount] = useState(0);
@@ -58,315 +60,261 @@ export const CodingStats: React.FC = () => {
   // Attempt non-blocking background fetch from official/public APIs
   useEffect(() => {
     let isMounted = true;
-    getLiveCodingStats(codingStats).then((res) => {
-      if (isMounted) {
-        setDisplayStats(res.stats);
-        setLiveInfo(res);
+
+    async function syncLiveStats() {
+      try {
+        const result = await getLiveCodingStats(codingStats);
+        if (isMounted && result.stats) {
+          setDisplayStats(result.stats);
+          setLiveInfo({
+            isLive: result.isLive,
+            source: result.source,
+            lastUpdated: result.lastUpdated
+          });
+        }
+      } catch (err) {
+        console.warn('Live coding stats sync fallback to snapshot:', err);
       }
-    });
+    }
+
+    syncLiveStats();
+
     return () => {
       isMounted = false;
     };
   }, [codingStats]);
 
-  const total = (displayStats.easy || 0) + (displayStats.medium || 0) + (displayStats.hard || 0) || 1;
-  const easyPct = (((displayStats.easy || 0) / total) * 100).toFixed(1);
-  const medPct = (((displayStats.medium || 0) / total) * 100).toFixed(1);
-  const hardPct = (((displayStats.hard || 0) / total) * 100).toFixed(1);
-
   return (
-    <section id="coding" className="py-24 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden">
+    <section
+      ref={sectionRef}
+      id="coding"
+      className="py-24 px-4 sm:px-6 lg:px-8 relative bg-[#fcfcfc] overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="flex flex-col items-center mb-16 text-center">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center gap-1.5">
-            <Flame className="w-4 h-4 text-[#b91c1c]" /> COMPETITIVE PROGRAMMING METRICS
-          </div>
-          <h2 className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95]">
-            THE GRIND<span className="text-[#b91c1c]">.</span>
-          </h2>
-          <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full" />
+          <CinematicReveal revealStyle="fade-up">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#b91c1c] font-sans mb-2 flex items-center justify-center gap-1.5">
+              <span>ALGORITHMIC TELEMETRY</span>
+              <AdminShieldTrigger className="opacity-20 hover:opacity-100 text-[#b91c1c]" iconSize={12} />
+            </div>
+          </CinematicReveal>
+
+          <SplitWordReveal
+            text="CODING STATS."
+            as="h2"
+            className="text-5xl sm:text-7xl font-normal uppercase tracking-tight text-[#111827] font-display mb-3 leading-[0.95] justify-center"
+            highlightWords={['STATS.']}
+          />
+          <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full mb-3" />
+          <p className="text-xs font-sans font-bold uppercase tracking-[0.15em] text-gray-500 max-w-lg">
+            MAX LEETCODE 1807 • CODECHEF 2★ (1477) • CODEFORCES (1272 PUPIL)
+          </p>
         </div>
 
-        {/* Dashboard Box */}
-        <div ref={sectionRef} className="spydyy-card p-6 sm:p-10 border border-gray-200 relative overflow-hidden">
-          {/* Feature 9: Spider-Man Data Scan Line */}
-          {(scanStatus === 'scanning' || scanStatus === 'detected') && (
-            <motion.div
-              initial={{ top: '0%', opacity: 0 }}
-              animate={{ top: '100%', opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 1.2, ease: 'linear' }}
-              className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_12px_rgba(239,68,68,0.7)] pointer-events-none z-30"
-            >
-              <span className="absolute left-1/2 -translate-x-1/2 -top-1 w-2 h-2 rounded-full bg-red-400 shadow-[0_0_8px_#ef4444]" />
-            </motion.div>
-          )}
-
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-8 border-b border-gray-200 font-mono text-xs text-gray-600">
-            <div className="flex items-center gap-2 text-[#b91c1c] font-bold">
-              <Terminal className="w-4 h-4" /> CODE_METRICS_HUD // C++ CORE
-            </div>
+        {/* Live Sync Status Bar */}
+        <CinematicReveal revealStyle="scale" delay={0.1} className="mb-10">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-gray-200 shadow-sm">
             <div className="flex items-center gap-3">
-              {/* Feature 9: Telemetry Scan Status Badge */}
-              {scanStatus !== 'idle' && (
-                <span
-                  className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase transition-all duration-300 flex items-center gap-1.5 ${
-                    scanStatus === 'scanning'
-                      ? 'bg-red-100 text-red-700 border border-red-300'
-                      : scanStatus === 'detected'
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      scanStatus === 'synced' ? 'bg-emerald-600' : 'bg-red-500 animate-ping'
-                    }`}
-                  />
+              <span
+                className={`w-3 h-3 rounded-full ${
+                  scanStatus === 'synced'
+                    ? 'bg-emerald-500 ring-4 ring-emerald-100 animate-pulse'
+                    : 'bg-[#b91c1c] ring-4 ring-red-100'
+                }`}
+              />
+              <div>
+                <span className="text-xs font-mono font-bold uppercase text-gray-800 tracking-wider block">
+                  STATUS:{' '}
                   {scanStatus === 'scanning'
-                    ? 'SCANNING WEB...'
+                    ? 'CONNECTING TO LEADERBOARDS...'
                     : scanStatus === 'detected'
-                    ? 'DATA DETECTED'
-                    : 'WEB DATA SYNCED ✓'}
+                    ? 'EXTRACTING BENCHMARKS...'
+                    : 'LIVE STATS VERIFIED'}
                 </span>
-              )}
-              {liveInfo.isLive ? (
-                <span className="text-emerald-600 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  {liveInfo.lastUpdated}
+                <span className="text-[11px] font-mono text-gray-500">
+                  {liveInfo.lastUpdated ? `TIMESTAMP: ${liveInfo.lastUpdated}` : 'LEADERBOARDS VERIFIED'}
                 </span>
-              ) : (
-                <span className="text-gray-500 font-semibold">{liveInfo.lastUpdated}</span>
-              )}
-              <span className="text-blue-600 font-bold">STATUS: ACTIVE COMPETITOR</span>
-              <span>PRIMARY: C++</span>
-              <AdminShieldTrigger className="opacity-25 hover:opacity-100 text-gray-400" iconSize={12} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold text-gray-500 uppercase">TIER:</span>
+              <span className="text-xs font-mono font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded">
+                TOP 8% WORLDWIDE
+              </span>
             </div>
           </div>
+        </CinematicReveal>
 
-          {/* 4 Clickable Core Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {/* LeetCode Solved Card */}
-            <motion.a
-              href={displayStats.leetcodeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-web-target="coding-card"
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-[#b91c1c] hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
-                  LEETCODE SOLVED
+        {/* 4 Metric Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* Card 1: Total Problems Solved */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: EASINGS.cinematic }}
+            className="cursor-target spydyy-card p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono font-bold text-gray-500 uppercase tracking-wider">
+                  TOTAL SOLVED
                 </span>
-                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-[#b91c1c] transition-colors" />
+                <Code2 className="w-5 h-5 text-[#b91c1c]" />
               </div>
-              <div className="text-5xl sm:text-6xl font-normal font-display text-[#b91c1c] my-0.5 tracking-tight leading-none">
-                <CountUpNumber target={displayStats.totalSolved} />
+              <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
+                <CountUpNumber target={displayStats.totalSolved} />+
               </div>
-              <span className="text-[10px] font-mono text-gray-500 font-bold flex items-center gap-1 group-hover:text-[#b91c1c] transition-colors">
-                {displayStats.totalSolved} PROBLEMS SOLVED • VIEW PROFILE →
-              </span>
-            </motion.a>
+              <p className="text-xs font-sans text-gray-600">
+                Data structures & algorithms benchmarks in C++
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
+              <span className="text-emerald-600 font-bold">EASY: {displayStats.easy}</span>
+              <span className="text-amber-600 font-bold">MED: {displayStats.medium}</span>
+              <span className="text-rose-600 font-bold">HARD: {displayStats.hard}</span>
+            </div>
+          </motion.div>
 
-            {/* Max LeetCode Rating Card */}
-            <motion.a
-              href={displayStats.leetcodeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-web-target="coding-card"
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-amber-500 hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
-                  MAX LEETCODE
+          {/* Card 2: LeetCode Rating */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: EASINGS.cinematic }}
+            className="cursor-target spydyy-card p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono font-bold text-gray-500 uppercase tracking-wider">
+                  LEETCODE CONTEST
                 </span>
-                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-amber-600 transition-colors" />
+                <Flame className="w-5 h-5 text-amber-500" />
               </div>
-              <div className="text-5xl sm:text-6xl font-normal font-display text-amber-500 flex items-center justify-center gap-1.5 my-0.5 tracking-tight leading-none">
-                <Star className="w-7 h-7 text-amber-500 fill-amber-500" />
+              <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
                 <CountUpNumber target={displayStats.rating} />
               </div>
-              <span className="text-[10px] font-mono text-amber-600 font-bold group-hover:underline transition-colors">
-                {displayStats.rating >= 1800 ? 'TOP 8% GLOBAL CONTEST →' : 'TOP 7% GLOBAL CONTEST →'}
-              </span>
-            </motion.a>
+              <p className="text-xs font-sans text-gray-600">
+                Peak rated contest performance (Knight track)
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
+              <span className="text-gray-500">USERNAME:</span>
+              <span className="font-bold text-gray-800">Sp4rk314</span>
+            </div>
+          </motion.div>
 
-            {/* Codeforces Max Rating Card */}
-            <motion.a
+          {/* Card 3: Codeforces Rating */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: EASINGS.cinematic }}
+            className="cursor-target spydyy-card p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono font-bold text-gray-500 uppercase tracking-wider">
+                  CODEFORCES
+                </span>
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
+                <CountUpNumber target={displayStats.codeforcesRating} />
+              </div>
+              <p className="text-xs font-sans text-gray-600">
+                {displayStats.codeforcesStatus}
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
+              <span className="text-gray-500">HANDLE:</span>
+              <span className="font-bold text-gray-800">itsakash314</span>
+            </div>
+          </motion.div>
+
+          {/* Card 4: CodeChef Rating */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: EASINGS.cinematic }}
+            className="cursor-target spydyy-card p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-mono font-bold text-gray-500 uppercase tracking-wider">
+                  CODECHEF
+                </span>
+                <Star className="w-5 h-5 text-amber-500" />
+              </div>
+              <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
+                <CountUpNumber target={displayStats.codechefRating} />
+              </div>
+              <p className="text-xs font-sans text-gray-600">
+                {displayStats.codechefStars} Division Coder
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
+              <span className="text-gray-500">HANDLE:</span>
+              <span className="font-bold text-gray-800">sp4rk314</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Profile Link Out Buttons */}
+        <CinematicReveal revealStyle="fade-up" delay={0.2} className="flex flex-wrap items-center justify-center gap-4">
+          <WebMagneticButton>
+            <a
+              href={displayStats.leetcodeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-target px-6 py-3 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-white border border-gray-200 text-gray-800 hover:border-red-600 hover:text-red-600 shadow-sm transition-all flex items-center gap-2"
+            >
+              <span>LEETCODE PROFILE</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </WebMagneticButton>
+
+          <WebMagneticButton>
+            <a
               href={displayStats.codeforcesUrl}
               target="_blank"
               rel="noopener noreferrer"
-              data-web-target="coding-card"
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-blue-600 hover:shadow-md transition-all cursor-pointer"
+              className="cursor-target px-6 py-3 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-white border border-gray-200 text-gray-800 hover:border-red-600 hover:text-red-600 shadow-sm transition-all flex items-center gap-2"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
-                  MAX CODEFORCES
-                </span>
-                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-blue-600 transition-colors" />
-              </div>
-              <div className="text-5xl sm:text-6xl font-normal font-display text-blue-600 my-0.5 tracking-tight leading-none">
-                <CountUpNumber target={displayStats.codeforcesRating} />
-              </div>
-              <span className="text-[10px] font-mono text-blue-600 font-bold group-hover:underline transition-colors">
-                {displayStats.codeforcesStatus || '1109 MAX RATING'} →
-              </span>
-            </motion.a>
+              <span>CODEFORCES PROFILE</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </WebMagneticButton>
 
-            {/* CodeChef Rating Card */}
-            <motion.a
+          <WebMagneticButton>
+            <a
               href={displayStats.codechefUrl}
               target="_blank"
               rel="noopener noreferrer"
-              data-web-target="coding-card"
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="cursor-target p-5 rounded-2xl bg-white border border-gray-200 shadow-sm text-center flex flex-col items-center justify-center group hover:border-emerald-600 hover:shadow-md transition-all cursor-pointer"
+              className="cursor-target px-6 py-3 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-white border border-gray-200 text-gray-800 hover:border-red-600 hover:text-red-600 shadow-sm transition-all flex items-center gap-2"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-xs font-mono text-gray-500 font-bold uppercase tracking-wider">
-                  CODECHEF RATING
-                </span>
-                <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-emerald-600 transition-colors" />
-              </div>
-              <div className="text-5xl sm:text-6xl font-normal font-display text-emerald-600 my-0.5 tracking-tight leading-none">
-                <CountUpNumber target={displayStats.codechefRating} />
-              </div>
-              <span className="text-[10px] font-mono text-emerald-600 font-bold uppercase flex items-center gap-1 group-hover:underline transition-colors">
-                <Award className="w-3 h-3 text-emerald-600" /> {displayStats.codechefStars} →
-              </span>
-            </motion.a>
-          </div>
+              <span>CODECHEF PROFILE</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </WebMagneticButton>
 
-          {/* Difficulty Breakdown Visual Chart */}
-          <div className="mb-8 p-6 rounded-2xl bg-gray-50 border border-gray-200">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-mono text-gray-800 font-bold uppercase tracking-wider flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-[#b91c1c]" /> LEETCODE DIFFICULTY BREAKDOWN
-              </span>
-              <span className="text-xs font-mono text-gray-600 font-bold">
-                TOTAL: {total} SOLVED
-              </span>
-            </div>
-
-            <div className="h-3.5 w-full bg-gray-200 rounded-full overflow-hidden flex mb-6 border border-gray-300">
-              <div
-                style={{ width: `${easyPct}%` }}
-                className="h-full bg-emerald-500"
-                title={`Easy: ${displayStats.easy}`}
-              />
-              <div
-                style={{ width: `${medPct}%` }}
-                className="h-full bg-amber-500"
-                title={`Medium: ${displayStats.medium}`}
-              />
-              <div
-                style={{ width: `${hardPct}%` }}
-                className="h-full bg-red-600"
-                title={`Hard: ${displayStats.hard}`}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-mono text-emerald-700 font-bold uppercase block">EASY</span>
-                  <span className="text-3xl font-normal font-display text-emerald-900 leading-none">
-                    <CountUpNumber target={displayStats.easy} />
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-emerald-700">{easyPct}%</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-mono text-amber-700 font-bold uppercase block">MEDIUM</span>
-                  <span className="text-3xl font-normal font-display text-amber-900 leading-none">
-                    <CountUpNumber target={displayStats.medium} />
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-amber-700">{medPct}%</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-mono text-red-700 font-bold uppercase block">HARD</span>
-                  <span className="text-3xl font-normal font-display text-red-900 leading-none">
-                    <CountUpNumber target={displayStats.hard} />
-                  </span>
-                </div>
-                <span className="text-xs font-mono font-bold text-red-700">{hardPct}%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Profile Links & Codolio Central Hub */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            {/* Codolio Central Profile Button */}
-            {displayStats.codolioUrl && (
+          {displayStats.codolioUrl && (
+            <WebMagneticButton>
               <a
                 href={displayStats.codolioUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-white bg-gradient-to-r from-red-600 via-rose-700 to-red-800 hover:brightness-110 flex items-center gap-2 transition-all shadow-md transform hover:scale-[1.02]"
+                className="cursor-target px-6 py-3 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-white border border-gray-200 text-gray-800 hover:border-red-600 hover:text-red-600 shadow-sm transition-all flex items-center gap-2"
               >
-                <span>VIEW COMPLETE CODING PROFILE (CODOLIO)</span>
+                <span>CODOLIO TRACKER</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
-            )}
-
-            <WebMagneticButton>
-              <a
-                href={displayStats.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cursor-target px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-white bg-[#111827] hover:bg-black flex items-center gap-2 transition-colors shadow-sm"
-              >
-                <GithubIcon className="w-4 h-4" /> GITHUB REPO
-              </a>
             </WebMagneticButton>
-
-            <a
-              href={displayStats.leetcodeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-[#b91c1c] flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Code2 className="w-4 h-4 text-amber-600" /> LEETCODE <ExternalLink className="w-3 h-3" />
-            </a>
-
-            <a
-              href={displayStats.codeforcesUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-blue-600 flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Terminal className="w-4 h-4 text-blue-600" /> CODEFORCES <ExternalLink className="w-3 h-3" />
-            </a>
-
-            <a
-              href={displayStats.codechefUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-2.5 rounded-full text-sm font-normal font-display uppercase tracking-wider text-[#111827] bg-white border border-gray-300 hover:border-emerald-600 flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Award className="w-4 h-4 text-emerald-600" /> CODECHEF <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
+          )}
+        </CinematicReveal>
       </div>
     </section>
   );
