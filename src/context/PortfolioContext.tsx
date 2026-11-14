@@ -138,7 +138,7 @@ interface PortfolioContextType {
   deleteJourneyMilestone: (index: number) => void;
 
   // Messages CRUD
-  addMessage: (msg: { name: string; email: string; message: string }) => void;
+  addMessage: (msg: { name: string; email: string; message: string }) => Promise<{ success: boolean; error?: string }>;
   markMessageRead: (id: string, read?: boolean) => void;
   deleteMessage: (id: string) => void;
   clearAllMessages: () => void;
@@ -627,9 +627,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   // Messages CRUD
-  const addMessage = (msg: { name: string; email: string; message: string }) => {
-    const now = new Date();
-    const formatted = now.toLocaleDateString('en-US', {
+  const addMessage = async (msg: { name: string; email: string; message: string }): Promise<{ success: boolean; error?: string }> => {
+    const timestamp = Date.now();
+    const formatted = new Date(timestamp).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -637,20 +637,23 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     const newMsg: ContactMessage = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${timestamp}`,
       name: msg.name,
       email: msg.email,
       message: msg.message,
-      timestamp: Date.now(),
+      timestamp,
       dateFormatted: formatted,
       read: false
     };
     setMessages((prev) => [newMsg, ...prev]);
 
-    // Asynchronously replicate message to Neon Postgres
-    saveMessageToNeon(newMsg).catch((err) => {
-      console.warn('Could not replicate message to Neon Postgres:', err);
-    });
+    // Replicate message to Neon Postgres
+    const res = await saveMessageToNeon(newMsg);
+    if (!res.success) {
+      console.warn('Could not replicate message to Neon Postgres:', res.error);
+      return { success: false, error: res.error || 'Failed to persist message in database.' };
+    }
+    return { success: true };
   };
 
   const markMessageRead = (id: string, read = true) => {

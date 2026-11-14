@@ -21,7 +21,7 @@ export const Contact: React.FC = () => {
     if (status === 'error') setStatus('idle');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
@@ -45,17 +45,24 @@ export const Contact: React.FC = () => {
 
     setStatus('submitting');
 
-    // Save message to admin inbox in context/localStorage and Neon Postgres
-    addMessage({
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      message: formData.message.trim(),
-    });
+    try {
+      const res = await addMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        message: formData.message.trim(),
+      });
 
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', message: '' });
-    }, 600);
+      if (res && res.success === false) {
+        setStatus('error');
+        setErrorMessage(res.error || 'Failed to deliver signal to database.');
+      } else {
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '' });
+      }
+    } catch (err: any) {
+      setStatus('error');
+      setErrorMessage(err?.message || 'Transmission error. Please try again.');
+    }
   };
 
   const contactCards = [
