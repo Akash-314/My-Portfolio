@@ -113,7 +113,7 @@ export const CodingStats: React.FC = () => {
           />
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full mb-3" />
           <p className="text-xs font-sans font-bold uppercase tracking-[0.15em] text-gray-500 max-w-lg">
-            {`MAX LEETCODE ${displayStats.rating} • CODECHEF ${displayStats.codechefStars?.replace(/ Coder$/, '') || '2★'} (${displayStats.codechefRating}) • CODEFORCES (${displayStats.codeforcesRating} ${displayStats.codeforcesStatus?.includes('(') ? displayStats.codeforcesStatus.split('(')[1].replace(')', '').toUpperCase() : 'PUPIL'})`}
+            {`MAX LEETCODE ${displayStats.maxRating || 1807} (CURRENT ${displayStats.rating}) • CODECHEF ${displayStats.codechefStars?.replace(/ Coder$/, '') || '2★'} (${displayStats.codechefRating}) • CODEFORCES (${displayStats.maxCodeforcesRating || 1272} MAX / ${displayStats.codeforcesRating} CURRENT)`}
           </p>
         </div>
 
@@ -172,6 +172,9 @@ export const CodingStats: React.FC = () => {
               <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
                 <CountUpNumber target={displayStats.totalSolved} />+
               </div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-red-600 bg-red-50 border border-red-200/80 rounded-md px-2 py-0.5 mb-2.5">
+                <span>AC BENCHMARKS</span>
+              </div>
               <p className="text-xs font-sans text-gray-600">
                 Data structures & algorithms benchmarks in C++
               </p>
@@ -201,6 +204,10 @@ export const CodingStats: React.FC = () => {
               <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
                 <CountUpNumber target={displayStats.rating} />
               </div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-amber-600 bg-amber-50 border border-amber-200/80 rounded-md px-2 py-0.5 mb-2.5">
+                <span>MAX RATING:</span>
+                <span>{displayStats.maxRating || displayStats.maxLeetcodeRating || 1807}</span>
+              </div>
               <p className="text-xs font-sans text-gray-600">
                 Peak rated contest performance (Knight track)
               </p>
@@ -229,6 +236,10 @@ export const CodingStats: React.FC = () => {
               <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
                 <CountUpNumber target={displayStats.codeforcesRating} />
               </div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-blue-600 bg-blue-50 border border-blue-200/80 rounded-md px-2 py-0.5 mb-2.5">
+                <span>MAX RATING:</span>
+                <span>{displayStats.maxCodeforcesRating || 1272}</span>
+              </div>
               <p className="text-xs font-sans text-gray-600">
                 {displayStats.codeforcesStatus}
               </p>
@@ -256,6 +267,10 @@ export const CodingStats: React.FC = () => {
               </div>
               <div className="text-5xl font-display font-normal text-[#111827] tracking-tight mb-2">
                 <CountUpNumber target={displayStats.codechefRating} />
+              </div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-amber-700 bg-amber-50 border border-amber-200/80 rounded-md px-2 py-0.5 mb-2.5">
+                <span>MAX RATING:</span>
+                <span>{displayStats.maxCodechefRating || 1477}</span>
               </div>
               <p className="text-xs font-sans text-gray-600">
                 {displayStats.codechefStars} Division Coder

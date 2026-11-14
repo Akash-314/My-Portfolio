@@ -38,16 +38,22 @@ async function fetchWithTimeout(
 /**
  * Parse HTML returned from CodeChef user profile page
  */
-function parseCodeChefHtml(html: string): { rating?: number; stars?: string } | null {
+function parseCodeChefHtml(html: string): { rating?: number; maxRating?: number; stars?: string } | null {
   const ratingMatch = html.match(/class=["']rating-number["'][^>]*>[\s\r\n]*([0-9]+)/i);
   const rating = ratingMatch ? parseInt(ratingMatch[1], 10) : undefined;
+
+  const highestMatch =
+    html.match(/\(Highest Rating[\s\S]*?([0-9]+)\)/i) ||
+    html.match(/Highest Rating[\s\S]*?([0-9]+)/i) ||
+    html.match(/max-rating[\s\S]*?([0-9]+)/i);
+  const maxRating = highestMatch ? parseInt(highestMatch[1], 10) : rating;
 
   const starSection = html.match(/class=["']rating-star["'][\s\S]*?<\/div>/i);
   const starsCount = (starSection?.[0]?.match(/&#9733;|★/g) || []).length;
   const stars = starsCount > 0 ? `${starsCount}★ Coder` : undefined;
 
-  if (rating || stars) {
-    return { rating, stars };
+  if (rating || stars || maxRating) {
+    return { rating, maxRating, stars };
   }
   return null;
 }
@@ -64,6 +70,7 @@ async function fetchLeetCodeStats(username: string): Promise<{
   medium?: number;
   hard?: number;
   rating?: number;
+  maxRating?: number;
 } | null> {
   // Concurrently fetch solved counts and contest rating
   const [solvedResult, ratingResult] = await Promise.allSettled([
@@ -186,7 +193,7 @@ async function fetchLeetCodeStats(username: string): Promise<{
         // Continue to next tier
       }
 
-      // Tier 2C: Render hosted Alfa API for contest rating
+      // Tier 2C: Render hosted Alfa API for contest rating & max contest history
       try {
         const contestRes = await fetchWithTimeout(
           `https://alfa-leetcode-api.onrender.com/userContestRankingInfo/${encodeURIComponent(username)}`,
@@ -195,8 +202,20 @@ async function fetchLeetCodeStats(username: string): Promise<{
         if (contestRes.ok) {
           const contestData = await contestRes.json();
           const rawRating = contestData?.userContestRanking?.rating;
+          let maxRating: number | undefined;
+          if (Array.isArray(contestData?.userContestRankingHistory)) {
+            const historyRatings = contestData.userContestRankingHistory
+              .filter((h: any) => h.attended && typeof h.rating === 'number')
+              .map((h: any) => Math.round(h.rating));
+            if (historyRatings.length > 0) {
+              maxRating = Math.max(...historyRatings);
+            }
+          }
           if (rawRating && !isNaN(Number(rawRating))) {
-            return { rating: Math.round(Number(rawRating)) };
+            return {
+              rating: Math.round(Number(rawRating)),
+              maxRating: maxRating || Math.round(Number(rawRating))
+            };
           }
         }
       } catch {
@@ -219,7 +238,8 @@ async function fetchLeetCodeStats(username: string): Promise<{
     easy: solvedData?.easy,
     medium: solvedData?.medium,
     hard: solvedData?.hard,
-    rating: ratingData?.rating
+    rating: ratingData?.rating,
+    maxRating: ratingData?.maxRating
   };
 }
 
@@ -230,6 +250,7 @@ async function fetchLeetCodeStats(username: string): Promise<{
  */
 async function fetchCodeChefStats(username: string): Promise<{
   rating?: number;
+  maxRating?: number;
   stars?: string;
 } | null> {
   // Tier 1: Vite proxy / server proxy
@@ -259,7 +280,7 @@ async function fetchCodeChefStats(username: string): Promise<{
       const rating = !isNaN(parsedRating) && parsedRating > 0 ? parsedRating : undefined;
       const stars = data.stars ? `${data.stars}★ Coder` : undefined;
       if (rating || stars) {
-        return { rating, stars };
+        return { rating, maxRating: rating, stars };
       }
     }
   } catch {
@@ -344,8 +365,12 @@ export async function getLiveCodingStats(fallbackStats: CodingStats): Promise<Li
         const data = await res.json();
         if (data.status === 'OK' && data.result && data.result[0]) {
           const user = data.result[0];
-          if (user.maxRating) updatedStats.codeforcesRating = user.maxRating;
-          if (user.maxRank) updatedStats.codeforcesStatus = `${user.maxRating} Max Rating (${user.maxRank})`;
+          if (user.rating) updatedStats.codeforcesRating = user.rating;
+          if (user.maxRating) {
+            updatedStats.maxCodeforcesRating = user.maxRating;
+            if (!user.rating) updatedStats.codeforcesRating = user.maxRating;
+          }
+          if (user.maxRank) updatedStats.codeforcesStatus = `${user.maxRating || user.rating} Max Rating (${user.maxRank})`;
           syncedPlatforms.codeforces = true;
         }
       }
@@ -363,6 +388,13 @@ export async function getLiveCodingStats(fallbackStats: CodingStats): Promise<Li
       if (lcData.medium !== undefined) updatedStats.medium = lcData.medium;
       if (lcData.hard !== undefined) updatedStats.hard = lcData.hard;
       if (lcData.rating !== undefined) updatedStats.rating = lcData.rating;
+      if (lcData.maxRating !== undefined) {
+        updatedStats.maxRating = lcData.maxRating;
+        updatedStats.maxLeetcodeRating = lcData.maxRating;
+      } else {
+        updatedStats.maxRating = Math.max(updatedStats.rating || 0, fallbackStats.maxRating || 1807);
+        updatedStats.maxLeetcodeRating = updatedStats.maxRating;
+      }
       syncedPlatforms.leetcode = true;
     }
   }
@@ -372,6 +404,11 @@ export async function getLiveCodingStats(fallbackStats: CodingStats): Promise<Li
     const ccData = await fetchCodeChefStats(ccUsername);
     if (ccData) {
       if (ccData.rating !== undefined) updatedStats.codechefRating = ccData.rating;
+      if (ccData.maxRating !== undefined) {
+        updatedStats.maxCodechefRating = ccData.maxRating;
+      } else {
+        updatedStats.maxCodechefRating = Math.max(updatedStats.codechefRating || 0, fallbackStats.maxCodechefRating || 1477);
+      }
       if (ccData.stars !== undefined) updatedStats.codechefStars = ccData.stars;
       syncedPlatforms.codechef = true;
     }

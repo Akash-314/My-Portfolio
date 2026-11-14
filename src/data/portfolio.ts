@@ -25,9 +25,13 @@ export interface CodingStats {
   easy: number;
   medium: number;
   hard: number;
-  rating: number; // Max LeetCode 1731
-  codeforcesRating: number; // Max CF 1109
-  codechefRating: number; // Max CodeChef 1424
+  rating: number; // Current LeetCode contest rating
+  maxRating: number; // Max / Peak LeetCode contest rating
+  maxLeetcodeRating?: number; // Alias for max LeetCode rating
+  codeforcesRating: number; // Current Codeforces rating
+  maxCodeforcesRating: number; // Max Codeforces rating
+  codechefRating: number; // Current CodeChef rating
+  maxCodechefRating: number; // Max CodeChef rating
   codechefStars: string; // 2* Coder
   codeforcesStatus: string;
   githubUrl: string;
@@ -147,9 +151,13 @@ export const portfolioData: {
     easy: 175,
     medium: 369,
     hard: 90,
-    rating: 1794, // 1794 leetcode rating
-    codeforcesRating: 1272, // 1272 max cf rating (pupil)
-    codechefRating: 1477, // 1477 codechef rating
+    rating: 1794, // Current LeetCode contest rating
+    maxRating: 1807, // Max LeetCode contest rating (Peak: 1807)
+    maxLeetcodeRating: 1807,
+    codeforcesRating: 1251, // Current Codeforces rating
+    maxCodeforcesRating: 1272, // Max Codeforces rating (Pupil)
+    codechefRating: 1477, // Current CodeChef rating
+    maxCodechefRating: 1477, // Max CodeChef rating
     codechefStars: "2★ Coder", // 2* coder
     codeforcesStatus: "1272 Max Rating (Pupil)",
     githubUrl: "https://github.com/Akash-314",

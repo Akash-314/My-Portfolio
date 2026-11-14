@@ -236,24 +236,19 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const saved = localStorage.getItem(`${STORAGE_DATA_KEY}_codingStats`);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (
-          parsed.leetcodeUsername === 'Akash-314' ||
-          parsed.codechefUsername === 'akashkumar314' ||
-          !parsed.rating ||
-          parsed.rating <= 1736 ||
-          parsed.rating === 1807 ||
-          !parsed.totalSolved ||
-          parsed.totalSolved < 634 ||
-          !parsed.codolioUrl
-        ) {
-          return {
-            ...initialPortfolioData.codingStats,
-            ...parsed,
-            totalSolved: Math.max(parsed.totalSolved || 0, 634),
-            rating: parsed.rating === 1807 ? 1794 : (parsed.rating || 1794)
-          };
-        }
-        return { ...initialPortfolioData.codingStats, ...parsed };
+        const resolved: CodingStats = {
+          ...initialPortfolioData.codingStats,
+          ...parsed,
+          totalSolved: Math.max(parsed.totalSolved || 0, 634),
+          rating: parsed.rating === 1807 ? 1794 : (parsed.rating || 1794),
+          maxRating: parsed.maxRating || parsed.maxLeetcodeRating || initialPortfolioData.codingStats.maxRating,
+          maxLeetcodeRating: parsed.maxLeetcodeRating || parsed.maxRating || initialPortfolioData.codingStats.maxRating,
+          codeforcesRating: parsed.codeforcesRating || initialPortfolioData.codingStats.codeforcesRating,
+          maxCodeforcesRating: parsed.maxCodeforcesRating || initialPortfolioData.codingStats.maxCodeforcesRating,
+          codechefRating: parsed.codechefRating || initialPortfolioData.codingStats.codechefRating,
+          maxCodechefRating: parsed.maxCodechefRating || initialPortfolioData.codingStats.maxCodechefRating,
+        };
+        return resolved;
       }
     } catch (e) {
       console.error('Error loading stats from localStorage:', e);
@@ -483,13 +478,14 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const dynamicProjects = React.useMemo(() => {
     return projects.map((p) => {
       if (p.id === 'leetcode-cp-suite') {
+        const peakRating = codingStats.maxRating || codingStats.rating;
         return {
           ...p,
           subtitle: `${codingStats.totalSolved}+ Problems Solved & Codeforces CP-31 Sheet Solutions`,
           description: `Production-grade C++ implementations of advanced Data Structures & Algorithms, including Graph algorithms, Dynamic Programming, Segment Trees, and Disjoint Set Union (DSU) tested across ${codingStats.totalSolved}+ competitive coding benchmarks.`,
           highlights: p.highlights.map((h) => {
             if (h.includes('LeetCode problems solved') || h.includes('Contest Rating')) {
-              return `${codingStats.totalSolved}+ LeetCode problems solved with ${codingStats.rating} Contest Rating`;
+              return `${codingStats.totalSolved}+ LeetCode problems solved with ${peakRating} Max Contest Rating`;
             }
             return h;
           })
@@ -497,28 +493,41 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
       return p;
     });
-  }, [projects, codingStats.totalSolved, codingStats.rating]);
+  }, [projects, codingStats.totalSolved, codingStats.rating, codingStats.maxRating]);
 
   const dynamicAchievements = React.useMemo(() => {
     return achievements.map((a) => {
       if (a.id === 'leetcode-knight') {
+        const peakRating = codingStats.maxRating || codingStats.rating;
         return {
           ...a,
-          title: `LEETCODE ${codingStats.rating} RATING & ${codingStats.totalSolved} PROBLEMS`,
-          description: `Achieved max contest rating of ${codingStats.rating} with ${codingStats.totalSolved} algorithmic problems solved across Easy, Medium, and Hard tiers in C++.`
+          title: `LEETCODE ${peakRating} MAX RATING & ${codingStats.totalSolved} PROBLEMS`,
+          description: `Achieved max contest rating of ${peakRating} (current ${codingStats.rating}) with ${codingStats.totalSolved} algorithmic problems solved across Easy, Medium, and Hard tiers in C++.`
         };
       }
       if (a.id === 'codechef-stars') {
         const stars = codingStats.codechefStars?.replace(/ Coder$/, '') || '2★';
+        const maxCc = codingStats.maxCodechefRating || codingStats.codechefRating;
+        const maxCf = codingStats.maxCodeforcesRating || codingStats.codeforcesRating;
         return {
           ...a,
-          title: `${stars} CODER ON CODECHEF (${codingStats.codechefRating}) & CF ${codingStats.codeforcesRating}`,
-          tags: [`CodeChef ${codingStats.codechefRating}`, `Codeforces ${codingStats.codeforcesRating}`, 'Division Competitions']
+          title: `${stars} CODER ON CODECHEF (${maxCc} MAX) & CF ${maxCf} MAX`,
+          tags: [`CodeChef ${codingStats.codechefRating}`, `Codeforces ${codingStats.codeforcesRating}`, `Max CF ${maxCf}`, 'Division Competitions']
         };
       }
       return a;
     });
-  }, [achievements, codingStats.rating, codingStats.totalSolved, codingStats.codechefStars, codingStats.codechefRating, codingStats.codeforcesRating]);
+  }, [
+    achievements,
+    codingStats.rating,
+    codingStats.maxRating,
+    codingStats.totalSolved,
+    codingStats.codechefStars,
+    codingStats.codechefRating,
+    codingStats.maxCodechefRating,
+    codingStats.codeforcesRating,
+    codingStats.maxCodeforcesRating
+  ]);
 
   const dynamicJourney = React.useMemo(() => {
     return journey.map((j) => {

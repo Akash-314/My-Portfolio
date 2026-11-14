@@ -208,8 +208,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
     medium: codingStats.medium,
     hard: codingStats.hard,
     rating: codingStats.rating,
+    maxRating: codingStats.maxRating || 1807,
     codeforcesRating: codingStats.codeforcesRating,
+    maxCodeforcesRating: codingStats.maxCodeforcesRating || 1272,
     codechefRating: codingStats.codechefRating,
+    maxCodechefRating: codingStats.maxCodechefRating || 1477,
     codechefStars: codingStats.codechefStars,
     codeforcesStatus: codingStats.codeforcesStatus,
     leetcodeUrl: codingStats.leetcodeUrl,
@@ -231,8 +234,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       medium: codingStats.medium,
       hard: codingStats.hard,
       rating: codingStats.rating,
+      maxRating: codingStats.maxRating || 1807,
       codeforcesRating: codingStats.codeforcesRating,
+      maxCodeforcesRating: codingStats.maxCodeforcesRating || 1272,
       codechefRating: codingStats.codechefRating,
+      maxCodechefRating: codingStats.maxCodechefRating || 1477,
       codechefStars: codingStats.codechefStars,
       codeforcesStatus: codingStats.codeforcesStatus,
       leetcodeUrl: codingStats.leetcodeUrl,
@@ -630,8 +636,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
       medium: Number(ratingsForm.medium),
       hard: Number(ratingsForm.hard),
       rating: Number(ratingsForm.rating),
+      maxRating: Number(ratingsForm.maxRating),
+      maxLeetcodeRating: Number(ratingsForm.maxRating),
       codeforcesRating: Number(ratingsForm.codeforcesRating),
+      maxCodeforcesRating: Number(ratingsForm.maxCodeforcesRating),
       codechefRating: Number(ratingsForm.codechefRating),
+      maxCodechefRating: Number(ratingsForm.maxCodechefRating),
       codechefStars: ratingsForm.codechefStars.trim(),
       codeforcesStatus: ratingsForm.codeforcesStatus.trim(),
       leetcodeUrl: ratingsForm.leetcodeUrl.trim(),
@@ -664,8 +674,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
         medium: result.stats.medium,
         hard: result.stats.hard,
         rating: result.stats.rating,
+        maxRating: result.stats.maxRating || prev.maxRating,
         codeforcesRating: result.stats.codeforcesRating,
-        codechefRating: result.stats.codechefRating
+        maxCodeforcesRating: result.stats.maxCodeforcesRating || prev.maxCodeforcesRating,
+        codechefRating: result.stats.codechefRating,
+        maxCodechefRating: result.stats.maxCodechefRating || prev.maxCodechefRating
       }));
       updateCodingStats(result.stats);
       const syncedNames = [
@@ -900,11 +913,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
                 <div className="p-5 rounded-2xl bg-[#141722] border border-gray-800">
                   <span className="text-[10px] font-mono text-gray-400 uppercase font-bold block mb-1">
-                    MAX LEETCODE RATING
+                    LEETCODE CONTEST RATING
                   </span>
                   <div className="text-3xl font-black font-mono text-amber-400">{codingStats.rating}</div>
-                  <span className="text-[10px] font-mono text-gray-400 font-bold mt-1 block">
-                    {codingStats.totalSolved} Problems Solved
+                  <span className="text-[10px] font-mono text-amber-300 font-bold mt-1 block">
+                    Max: {codingStats.maxRating || 1807} • {codingStats.totalSolved} Solved
                   </span>
                 </div>
 
@@ -2593,7 +2606,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
                     <div>
                       <label className="block text-[10px] font-mono font-bold uppercase text-gray-400 mb-1">
-                        MAX LEETCODE RATING
+                        LEETCODE CURRENT
                       </label>
                       <input
                         type="number"
@@ -2604,8 +2617,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     </div>
 
                     <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase text-amber-400 mb-1">
+                        LEETCODE MAX RATING
+                      </label>
+                      <input
+                        type="number"
+                        value={ratingsForm.maxRating}
+                        onChange={(e) => setRatingsForm({ ...ratingsForm, maxRating: Number(e.target.value) })}
+                        className="w-full px-4 py-2.5 rounded-xl bg-[#0f1118] border border-amber-800 text-amber-300 text-sm font-mono font-bold focus:border-amber-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
                       <label className="block text-[10px] font-mono font-bold uppercase text-gray-400 mb-1">
-                        MAX CODEFORCES
+                        CODEFORCES CURRENT
                       </label>
                       <input
                         type="number"
@@ -2616,14 +2641,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                     </div>
 
                     <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase text-blue-400 mb-1">
+                        CODEFORCES MAX RATING
+                      </label>
+                      <input
+                        type="number"
+                        value={ratingsForm.maxCodeforcesRating}
+                        onChange={(e) => setRatingsForm({ ...ratingsForm, maxCodeforcesRating: Number(e.target.value) })}
+                        className="w-full px-4 py-2.5 rounded-xl bg-[#0f1118] border border-blue-800 text-blue-300 text-sm font-mono font-bold focus:border-blue-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
                       <label className="block text-[10px] font-mono font-bold uppercase text-gray-400 mb-1">
-                        CODECHEF RATING
+                        CODECHEF CURRENT
                       </label>
                       <input
                         type="number"
                         value={ratingsForm.codechefRating}
                         onChange={(e) => setRatingsForm({ ...ratingsForm, codechefRating: Number(e.target.value) })}
                         className="w-full px-4 py-2.5 rounded-xl bg-[#0f1118] border border-gray-700 text-emerald-400 text-sm font-mono font-bold focus:border-red-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold uppercase text-emerald-400 mb-1">
+                        CODECHEF MAX RATING
+                      </label>
+                      <input
+                        type="number"
+                        value={ratingsForm.maxCodechefRating}
+                        onChange={(e) => setRatingsForm({ ...ratingsForm, maxCodechefRating: Number(e.target.value) })}
+                        className="w-full px-4 py-2.5 rounded-xl bg-[#0f1118] border border-emerald-800 text-emerald-300 text-sm font-mono font-bold focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                   </div>
