@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { portfolioData as initialPortfolioData } from '../data/portfolio';
-import { uploadResumeToNeonStorage, saveMessageToNeon, fetchMessagesFromNeon } from '../services/neonService';
+import {
+  uploadResumeToNeonStorage,
+  saveMessageToNeon,
+  fetchMessagesFromNeon,
+  deleteMessageFromNeon,
+  clearAllMessagesFromNeon,
+  updateMessageReadStatusInNeon,
+} from '../services/neonService';
 import type {
   Project,
   Achievement,
@@ -139,9 +146,9 @@ interface PortfolioContextType {
 
   // Messages CRUD
   addMessage: (msg: { name: string; email: string; message: string }) => Promise<{ success: boolean; error?: string }>;
-  markMessageRead: (id: string, read?: boolean) => void;
-  deleteMessage: (id: string) => void;
-  clearAllMessages: () => void;
+  markMessageRead: (id: string, read?: boolean) => Promise<void>;
+  deleteMessage: (id: string) => Promise<{ success: boolean; error?: string }>;
+  clearAllMessages: () => Promise<void>;
 
   // Auth & Admin Security
   isAuthenticated: boolean;
@@ -656,16 +663,23 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return { success: true };
   };
 
-  const markMessageRead = (id: string, read = true) => {
+  const markMessageRead = async (id: string, read = true) => {
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read } : m)));
+    await updateMessageReadStatusInNeon(id, read);
   };
 
-  const deleteMessage = (id: string) => {
+  const deleteMessage = async (id: string): Promise<{ success: boolean; error?: string }> => {
     setMessages((prev) => prev.filter((m) => m.id !== id));
+    const res = await deleteMessageFromNeon(id);
+    if (!res.success) {
+      console.warn('Could not delete message from Neon database:', res.error);
+    }
+    return res;
   };
 
-  const clearAllMessages = () => {
+  const clearAllMessages = async () => {
     setMessages([]);
+    await clearAllMessagesFromNeon();
   };
 
   const unreadMessagesCount = messages.filter((m) => !m.read).length;

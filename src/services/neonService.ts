@@ -68,6 +68,58 @@ export async function fetchMessagesFromNeon(): Promise<StoredMessage[]> {
   }
 }
 
+export async function deleteMessageFromNeon(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`/api/contact/messages?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error || 'Failed to delete from database' };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error' };
+  }
+}
+
+export async function clearAllMessagesFromNeon(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/contact/messages?all=true', {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error || 'Failed to delete all messages' };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error' };
+  }
+}
+
+export async function updateMessageReadStatusInNeon(
+  id: string,
+  read: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/contact/messages', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, read }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, error: err.error || 'Failed to update read status' };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Network error' };
+  }
+}
+
 export async function uploadResumeToNeonStorage(
   file: File
 ): Promise<{ success: boolean; url?: string; fileName?: string; fileSize?: string; message: string }> {

@@ -100,6 +100,74 @@ export default async function handler(req: any, res: any) {
     }
   }
 
+  // DELETE: Delete a specific message or all messages
+  if (req.method === 'DELETE') {
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        // ignore
+      }
+    }
+
+    const id = req.query?.id || body?.id;
+    const deleteAll = req.query?.all === 'true' || body?.all === true;
+
+    if (!id && !deleteAll) {
+      return res.status(400).json({ success: false, error: 'Missing message id parameter for deletion.' });
+    }
+
+    try {
+      if (deleteAll) {
+        await sql.query('DELETE FROM contact_messages;');
+        return res.status(200).json({ success: true, message: 'All messages successfully deleted from database.' });
+      }
+
+      const deleteRes = await sql.query('DELETE FROM contact_messages WHERE id = $1 RETURNING id;', [id]);
+      if (deleteRes.length === 0) {
+        // Message might have already been deleted or not exist in DB
+        return res.status(200).json({ success: true, message: 'Message removed.', deletedId: id });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Message successfully deleted from database.',
+        deletedId: id,
+      });
+    } catch (err: any) {
+      console.error('Error deleting message from Neon:', err);
+      return res.status(500).json({ success: false, error: err?.message || 'Database delete error' });
+    }
+  }
+
+  // PATCH: Update read status of a message
+  if (req.method === 'PATCH') {
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        // ignore
+      }
+    }
+
+    const id = req.query?.id || body?.id;
+    const read = body?.read !== undefined ? Boolean(body.read) : true;
+
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'Missing message id parameter.' });
+    }
+
+    try {
+      await sql.query('UPDATE contact_messages SET read = $1 WHERE id = $2;', [read, id]);
+      return res.status(200).json({ success: true, id, read });
+    } catch (err: any) {
+      console.error('Error updating message status in Neon:', err);
+      return res.status(500).json({ success: false, error: err?.message || 'Database update error' });
+    }
+  }
+
   return res.status(405).json({ success: false, error: 'Method not allowed' });
 }
 

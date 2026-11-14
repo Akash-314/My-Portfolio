@@ -3041,9 +3041,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
                 {messages.length > 0 && (
                   <button
                     onClick={() =>
-                      requestDelete('Clear Inbox', 'All messages in inbox', () => {
-                        clearAllMessages();
-                        triggerToast('All messages cleared.');
+                      requestDelete('Clear Inbox', 'All messages in inbox (permanent database wipe)', async () => {
+                        await clearAllMessages();
+                        triggerToast('All messages permanently deleted from database.');
                       })
                     }
                     className="px-4 py-2 rounded-xl bg-red-950/60 border border-red-800 text-red-300 hover:text-white text-xs font-mono font-bold flex items-center gap-2 transition-colors self-start cursor-pointer"
@@ -3099,14 +3099,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
 
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => markMessageRead(m.id, !m.read)}
-                            className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-mono font-bold transition-colors"
+                            onClick={async () => {
+                              await markMessageRead(m.id, !m.read);
+                              triggerToast(m.read ? 'Marked unread in database.' : 'Marked read in database.');
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-mono font-bold transition-colors cursor-pointer"
                           >
                             {m.read ? 'MARK UNREAD' : 'MARK READ'}
                           </button>
                           <button
-                            onClick={() => deleteMessage(m.id)}
-                            className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 transition-colors"
+                            onClick={() =>
+                              requestDelete('Delete Transmission', `Message from ${m.name}`, async () => {
+                                const res = await deleteMessage(m.id);
+                                if (res && res.success === false) {
+                                  triggerToast('Failed to delete from database: ' + (res.error || 'Unknown error'));
+                                } else {
+                                  triggerToast('Message permanently deleted from database.');
+                                }
+                              })
+                            }
+                            className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
                             title="Delete Message"
                           >
                             <Trash2 className="w-4 h-4" />

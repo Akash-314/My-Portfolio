@@ -201,6 +201,56 @@ app.post('/api/contact/messages', async (req, res) => {
   }
 });
 
+const handleDeleteMessage = async (req: express.Request, res: express.Response) => {
+  if (!sql) return res.status(503).json({ error: 'Neon Postgres not configured' });
+  const id = req.params?.id || req.query?.id || req.body?.id;
+  const deleteAll = req.query?.all === 'true' || req.body?.all === true;
+
+  if (!id && !deleteAll) {
+    return res.status(400).json({ error: 'Missing message id parameter' });
+  }
+
+  try {
+    if (deleteAll) {
+      await sql.query('DELETE FROM contact_messages;');
+      return res.json({ success: true, message: 'All messages deleted from database' });
+    }
+
+    const deleteRes = await sql.query('DELETE FROM contact_messages WHERE id = $1 RETURNING id;', [id]);
+    res.json({
+      success: true,
+      message: 'Message successfully deleted from database',
+      deletedId: id,
+      found: deleteRes.length > 0,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Database delete error' });
+  }
+};
+
+app.delete('/api/contact/messages', handleDeleteMessage);
+app.delete('/api/contact/messages/:id', handleDeleteMessage);
+
+const handlePatchMessage = async (req: express.Request, res: express.Response) => {
+  if (!sql) return res.status(503).json({ error: 'Neon Postgres not configured' });
+  const id = req.params?.id || req.query?.id || req.body?.id;
+  const read = req.body?.read !== undefined ? Boolean(req.body.read) : true;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Missing message id parameter' });
+  }
+
+  try {
+    await sql.query('UPDATE contact_messages SET read = $1 WHERE id = $2;', [read, id]);
+    res.json({ success: true, id, read });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Database update error' });
+  }
+};
+
+app.patch('/api/contact/messages', handlePatchMessage);
+app.patch('/api/contact/messages/:id', handlePatchMessage);
+
 // --- OBJECT STORAGE: Assets / Resume Upload & Download ---
 app.post('/api/storage/upload', upload.single('file'), async (req, res) => {
   if (!s3) return res.status(503).json({ error: 'Neon Object Storage not configured' });
