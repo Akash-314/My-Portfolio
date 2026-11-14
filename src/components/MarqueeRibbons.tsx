@@ -4,15 +4,20 @@ import { CinematicReveal } from '../motion/CinematicReveal';
 
 export const MarqueeRibbons: React.FC = () => {
   const { codingStats } = usePortfolio();
-  const solvedCount = codingStats.totalSolved || 548;
+  const solvedCount = codingStats.totalSolved || 634;
+  const lcRating = codingStats.rating || 1794;
+  const cfRating = codingStats.codeforcesRating || 1272;
+  const ccRating = codingStats.codechefRating || 1477;
 
   const items = [
     'UI/UX DESIGN',
     'GSAP ANIMATIONS',
-    'REACT NATIVE',
     'FULL STACK ENGINEER',
     'C++ & DSA SPECIALIST',
     `LEETCODE ${solvedCount} SOLVED`,
+    `LEETCODE ${lcRating} RATING`,
+    `CODEFORCES ${cfRating} PUPIL`,
+    `CODECHEF ${ccRating} 2★`,
     'ARJUNA 2.0 WINNER',
   ];
 

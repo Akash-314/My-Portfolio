@@ -288,8 +288,8 @@ export async function getLiveCodingStats(fallbackStats: CodingStats): Promise<Li
     const cachedStr = localStorage.getItem(CACHE_STORAGE_KEY);
     if (cachedStr) {
       const cached = JSON.parse(cachedStr);
-      // Ensure cached leetcode data has rating >= 1800 if marked synced
-      const isLcValid = !cached.syncedPlatforms?.leetcode || (cached.stats?.rating && cached.stats.rating >= 1800);
+      // Ensure cached leetcode data has valid rating if marked synced
+      const isLcValid = !cached.syncedPlatforms?.leetcode || (typeof cached.stats?.rating === 'number' && cached.stats.rating > 0);
       if (cached.timestamp && now - cached.timestamp < CACHE_DURATION_MS && cached.stats && isLcValid) {
         return {
           stats: { ...fallbackStats, ...cached.stats },

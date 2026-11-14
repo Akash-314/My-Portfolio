@@ -143,11 +143,11 @@ export const portfolioData: {
   },
 
   codingStats: {
-    totalSolved: 548,
-    easy: 158,
-    medium: 313,
-    hard: 77,
-    rating: 1807, // 1807 leetcode rating
+    totalSolved: 634,
+    easy: 175,
+    medium: 369,
+    hard: 90,
+    rating: 1794, // 1794 leetcode rating
     codeforcesRating: 1272, // 1272 max cf rating (pupil)
     codechefRating: 1477, // 1477 codechef rating
     codechefStars: "2★ Coder", // 2* coder
@@ -160,7 +160,7 @@ export const portfolioData: {
     leetcodeUsername: "Sp4rk314",
     codeforcesUsername: "itsakash314",
     codechefUsername: "sp4rk314",
-    lastUpdated: "Archive Verified"
+    lastUpdated: "Live Verified"
   },
 
   achievements: [
@@ -179,12 +179,12 @@ export const portfolioData: {
     },
     {
       id: "leetcode-knight",
-      title: "LEETCODE 1807 RATING & 548 PROBLEMS",
+      title: "LEETCODE 1794 RATING & 634 PROBLEMS",
       event: "Global Contest Leaderboard",
       organizer: "LeetCode",
       year: "2024 - 2025",
       position: "Top 8% Worldwide",
-      description: "Achieved max contest rating of 1807 with 548 algorithmic problems solved across Easy, Medium, and Hard tiers in C++.",
+      description: "Achieved max contest rating of 1794 with 634 algorithmic problems solved across Easy, Medium, and Hard tiers in C++.",
       featured: false,
       tags: ["Competitive Programming", "C++", "Data Structures", "Algorithms"],
       order: 2,
@@ -301,14 +301,14 @@ export const portfolioData: {
     {
       id: "leetcode-cp-suite",
       title: "LeetCode & CP-31 Competitive Programming Suite",
-      subtitle: "548+ Problems Solved & Codeforces CP-31 Sheet Solutions",
-      description: "Production-grade C++ implementations of advanced Data Structures & Algorithms, including Graph algorithms, Dynamic Programming, Segment Trees, and Disjoint Set Union (DSU) tested across 548+ competitive coding benchmarks.",
+      subtitle: "634+ Problems Solved & Codeforces CP-31 Sheet Solutions",
+      description: "Production-grade C++ implementations of advanced Data Structures & Algorithms, including Graph algorithms, Dynamic Programming, Segment Trees, and Disjoint Set Union (DSU) tested across 634+ competitive coding benchmarks.",
       featured: false,
       technologies: ["C++17", "Data Structures", "Algorithms", "Competitive Programming", "Codeforces"],
       githubUrl: "https://github.com/Akash-314/LeetCode_Problems",
       imageAlt: "C++ Data Structures Algorithmic Suite Visualization",
       highlights: [
-        "548+ LeetCode problems solved with 1807 Contest Rating",
+        "634+ LeetCode problems solved with 1794 Contest Rating",
         "Systematic solutions to the Codeforces CP-31 practice sheet",
         "Includes custom Graph, Segment Tree, and Disjoint Set Union (DSU) implementations"
       ]
@@ -324,7 +324,7 @@ export const portfolioData: {
       description: "Pursuing Bachelor of Technology in Information Technology. Focusing deeply on software development, Data Structures & Algorithms, competitive programming, and practical technology projects.",
       details: [
         "Core Focus: C++ Programming, DSA, Systems Architecture",
-        "Active Competitive Programmer with 548 LeetCode problems solved",
+        "Active Competitive Programmer with 634 LeetCode problems solved",
         "Current Stage: Third Year Undergraduate"
       ]
     },

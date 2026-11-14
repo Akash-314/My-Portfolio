@@ -223,6 +223,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit }) => {
   });
   const [isSyncingLive, setIsSyncingLive] = useState(false);
 
+  useEffect(() => {
+    setRatingsForm((prev) => ({
+      ...prev,
+      totalSolved: codingStats.totalSolved,
+      easy: codingStats.easy,
+      medium: codingStats.medium,
+      hard: codingStats.hard,
+      rating: codingStats.rating,
+      codeforcesRating: codingStats.codeforcesRating,
+      codechefRating: codingStats.codechefRating,
+      codechefStars: codingStats.codechefStars,
+      codeforcesStatus: codingStats.codeforcesStatus,
+      leetcodeUrl: codingStats.leetcodeUrl,
+      codeforcesUrl: codingStats.codeforcesUrl,
+      codechefUrl: codingStats.codechefUrl,
+      githubUrl: codingStats.githubUrl,
+      codolioUrl: codingStats.codolioUrl || '',
+      leetcodeUsername: codingStats.leetcodeUsername || '',
+      codeforcesUsername: codingStats.codeforcesUsername || '',
+      codechefUsername: codingStats.codechefUsername || ''
+    }));
+  }, [codingStats]);
+
   // Settings State
   const [currentPass, setCurrentPass] = useState('');
   const [newPass, setNewPass] = useState('');

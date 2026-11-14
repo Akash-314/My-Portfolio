@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { portfolioData as initialPortfolioData } from '../data/portfolio';
+import { getLiveCodingStats } from '../services/codingStatsService';
 import {
   uploadResumeToNeonStorage,
   saveMessageToNeon,
@@ -240,11 +241,17 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           parsed.codechefUsername === 'akashkumar314' ||
           !parsed.rating ||
           parsed.rating <= 1736 ||
+          parsed.rating === 1807 ||
           !parsed.totalSolved ||
-          parsed.totalSolved <= 541 ||
+          parsed.totalSolved < 634 ||
           !parsed.codolioUrl
         ) {
-          return { ...parsed, ...initialPortfolioData.codingStats };
+          return {
+            ...initialPortfolioData.codingStats,
+            ...parsed,
+            totalSolved: Math.max(parsed.totalSolved || 0, 634),
+            rating: parsed.rating === 1807 ? 1794 : (parsed.rating || 1794)
+          };
         }
         return { ...initialPortfolioData.codingStats, ...parsed };
       }
@@ -445,6 +452,90 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     }).catch(() => {});
   }, []);
+
+  // Centralized live coding statistics auto-sync on mount to single source of truth
+  useEffect(() => {
+    let isMounted = true;
+    getLiveCodingStats(codingStats)
+      .then((result) => {
+        if (isMounted && result.stats) {
+          setCodingStats((prev) => {
+            const merged = { ...prev, ...result.stats };
+            try {
+              localStorage.setItem(`${STORAGE_DATA_KEY}_codingStats`, JSON.stringify(merged));
+            } catch (e) {
+              console.warn('Failed saving codingStats:', e);
+            }
+            return merged;
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Centralized coding stats sync fallback to snapshot:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Derived state: Inject centralized live coding stats everywhere numbers/ratings appear
+  const dynamicProjects = React.useMemo(() => {
+    return projects.map((p) => {
+      if (p.id === 'leetcode-cp-suite') {
+        return {
+          ...p,
+          subtitle: `${codingStats.totalSolved}+ Problems Solved & Codeforces CP-31 Sheet Solutions`,
+          description: `Production-grade C++ implementations of advanced Data Structures & Algorithms, including Graph algorithms, Dynamic Programming, Segment Trees, and Disjoint Set Union (DSU) tested across ${codingStats.totalSolved}+ competitive coding benchmarks.`,
+          highlights: p.highlights.map((h) => {
+            if (h.includes('LeetCode problems solved') || h.includes('Contest Rating')) {
+              return `${codingStats.totalSolved}+ LeetCode problems solved with ${codingStats.rating} Contest Rating`;
+            }
+            return h;
+          })
+        };
+      }
+      return p;
+    });
+  }, [projects, codingStats.totalSolved, codingStats.rating]);
+
+  const dynamicAchievements = React.useMemo(() => {
+    return achievements.map((a) => {
+      if (a.id === 'leetcode-knight') {
+        return {
+          ...a,
+          title: `LEETCODE ${codingStats.rating} RATING & ${codingStats.totalSolved} PROBLEMS`,
+          description: `Achieved max contest rating of ${codingStats.rating} with ${codingStats.totalSolved} algorithmic problems solved across Easy, Medium, and Hard tiers in C++.`
+        };
+      }
+      if (a.id === 'codechef-stars') {
+        const stars = codingStats.codechefStars?.replace(/ Coder$/, '') || '2★';
+        return {
+          ...a,
+          title: `${stars} CODER ON CODECHEF (${codingStats.codechefRating}) & CF ${codingStats.codeforcesRating}`,
+          tags: [`CodeChef ${codingStats.codechefRating}`, `Codeforces ${codingStats.codeforcesRating}`, 'Division Competitions']
+        };
+      }
+      return a;
+    });
+  }, [achievements, codingStats.rating, codingStats.totalSolved, codingStats.codechefStars, codingStats.codechefRating, codingStats.codeforcesRating]);
+
+  const dynamicJourney = React.useMemo(() => {
+    return journey.map((j) => {
+      if (j.details) {
+        return {
+          ...j,
+          details: j.details.map((d) => {
+            if (d.includes('LeetCode problems solved') || d.includes('Competitive Programmer with')) {
+              return `Active Competitive Programmer with ${codingStats.totalSolved} LeetCode problems solved`;
+            }
+            return d;
+          })
+        };
+      }
+      return j;
+    });
+  }, [journey, codingStats.totalSolved]);
 
   // Persist State Changes
   useEffect(() => {
@@ -712,9 +803,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 export const portfolioData = {
   personal: ${JSON.stringify(updatedPersonal, null, 2)},
   codingStats: ${JSON.stringify(codingStats, null, 2)},
-  achievements: ${JSON.stringify(achievements, null, 2)},
-  projects: ${JSON.stringify(projects, null, 2)},
-  journey: ${JSON.stringify(journey, null, 2)}
+  achievements: ${JSON.stringify(dynamicAchievements, null, 2)},
+  projects: ${JSON.stringify(dynamicProjects, null, 2)},
+  journey: ${JSON.stringify(dynamicJourney, null, 2)}
 };`;
   };
 
@@ -755,10 +846,10 @@ export const portfolioData = {
     <PortfolioContext.Provider
       value={{
         skills,
-        projects,
-        achievements,
+        projects: dynamicProjects,
+        achievements: dynamicAchievements,
         codingStats,
-        journey,
+        journey: dynamicJourney,
         messages,
         unreadMessagesCount,
         resumeSettings,

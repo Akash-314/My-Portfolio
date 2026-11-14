@@ -34,12 +34,16 @@ const CountUpNumber: React.FC<{ target: number; duration?: number }> = ({ target
 };
 
 export const CodingStats: React.FC = () => {
-  const { codingStats } = usePortfolio();
+  const { codingStats, updateCodingStats } = usePortfolio();
   const [displayStats, setDisplayStats] = useState(codingStats);
   const [liveInfo, setLiveInfo] = useState<Partial<LiveStatsResult>>({
     isLive: false,
     lastUpdated: codingStats.lastUpdated || 'Archive Verified'
   });
+
+  useEffect(() => {
+    setDisplayStats(codingStats);
+  }, [codingStats]);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const isSectionInView = useInView(sectionRef, { once: true, amount: 0.2 });
@@ -66,6 +70,7 @@ export const CodingStats: React.FC = () => {
         const result = await getLiveCodingStats(codingStats);
         if (isMounted && result.stats) {
           setDisplayStats(result.stats);
+          updateCodingStats(result.stats);
           setLiveInfo({
             isLive: result.isLive,
             source: result.source,
@@ -82,7 +87,7 @@ export const CodingStats: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [codingStats]);
+  }, []);
 
   return (
     <section
@@ -108,7 +113,7 @@ export const CodingStats: React.FC = () => {
           />
           <div className="h-1.5 w-16 bg-[#b91c1c] rounded-full mb-3" />
           <p className="text-xs font-sans font-bold uppercase tracking-[0.15em] text-gray-500 max-w-lg">
-            MAX LEETCODE 1807 • CODECHEF 2★ (1477) • CODEFORCES (1272 PUPIL)
+            {`MAX LEETCODE ${displayStats.rating} • CODECHEF ${displayStats.codechefStars?.replace(/ Coder$/, '') || '2★'} (${displayStats.codechefRating}) • CODEFORCES (${displayStats.codeforcesRating} ${displayStats.codeforcesStatus?.includes('(') ? displayStats.codeforcesStatus.split('(')[1].replace(')', '').toUpperCase() : 'PUPIL'})`}
           </p>
         </div>
 
@@ -202,7 +207,7 @@ export const CodingStats: React.FC = () => {
             </div>
             <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
               <span className="text-gray-500">USERNAME:</span>
-              <span className="font-bold text-gray-800">Sp4rk314</span>
+              <span className="font-bold text-gray-800">{displayStats.leetcodeUsername || 'Sp4rk314'}</span>
             </div>
           </motion.div>
 
@@ -230,7 +235,7 @@ export const CodingStats: React.FC = () => {
             </div>
             <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
               <span className="text-gray-500">HANDLE:</span>
-              <span className="font-bold text-gray-800">itsakash314</span>
+              <span className="font-bold text-gray-800">{displayStats.codeforcesUsername || 'itsakash314'}</span>
             </div>
           </motion.div>
 
@@ -258,7 +263,7 @@ export const CodingStats: React.FC = () => {
             </div>
             <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-mono">
               <span className="text-gray-500">HANDLE:</span>
-              <span className="font-bold text-gray-800">sp4rk314</span>
+              <span className="font-bold text-gray-800">{displayStats.codechefUsername || 'sp4rk314'}</span>
             </div>
           </motion.div>
         </div>
